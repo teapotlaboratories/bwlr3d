@@ -494,7 +494,6 @@
           "Net-(BT1-Pad1)",
           "Net-(C16-Pad2)",
           "Net-(C28-Pad1)",
-          "Net-(C6-Pad1)",
           "Net-(C7-Pad1)",
           "Net-(D1-Pad1)",
           "Net-(D2-Pad1)",
@@ -549,8 +548,8 @@
       "idf": "../../../../../../../../bwlr1e.emn",
       "netlist": "../../../../../../../../../../../",
       "specctra_dsn": "",
-      "step": "../../../../../../../../bwlr1e.step",
-      "vrml": "../../../../../../../../../product/bwlr1e/bwlr1e.wrl"
+      "step": "bwlr1e.step",
+      "vrml": "../3d/bwlr1e.wrl"
     },
     "page_layout_descr_file": ""
   },
