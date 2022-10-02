@@ -65,7 +65,9 @@ void setup() {
   
   
   //Call .beginCore() to configure the IMU
-  if( myIMU.beginCore() != 0 )
+  status_t begin_status = myIMU.beginCore();
+  Serial.printf("Begin Core Status: %d.\n", begin_status);
+  if( begin_status != 0 )
   {
     Serial.print("Error at beginCore().\n");
   }
