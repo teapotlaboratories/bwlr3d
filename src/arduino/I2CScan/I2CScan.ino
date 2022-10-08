@@ -24,7 +24,20 @@
 // Devices with higher bit address might not be seen properly.
 
 
-#define PERIPHERAL_POWER_EN           PB5
+// Teapot BWLR3D pins
+#define LED0                PA0
+#define LED1                PA1
+#define PERIPHERAL_POWER_EN PB5
+#define BATT_MEASURE_EN     PB2
+#define POWER_STATUS        PB12
+#define GPS_FORCE_ON        PA15
+#define GPS_TXD             PB7
+#define GPS_RXD             PB6
+#define I2C_SDA             PA11
+#define I2C_SCL             PA12
+#define MAG_INT             PB3
+#define IMU_INT             PB4   // new rev is PA10
+#define BATT_MEASURE        PA10  // new rev is PB4
 
 void setup() {
   

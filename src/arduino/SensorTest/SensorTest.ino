@@ -22,7 +22,6 @@ uint16_t errorsAndWarnings = 0;
 #define IMU_INT             PB4   // new rev is PA10
 #define BATT_MEASURE        PA10  // new rev is PB4
 
-
 Adafruit_LSM6DSOX sox;
 Adafruit_LIS3MDL lis3mdl;
 Adafruit_BME680 bme; // I2C
@@ -59,11 +58,13 @@ void loop() {
 void initializeSystem(){  
   api.system.restoreDefault();
   Serial.begin(115200);
-  
-  // power-on all peripheral
-  pinMode(PERIPHERAL_POWER_EN, OUTPUT);
-  digitalWrite(PERIPHERAL_POWER_EN, HIGH);
 
+  // initialize power pin
+  pinMode(PERIPHERAL_POWER_EN, OUTPUT);
+  
+  // disable sensor communication
+  disableSensorCommunication();
+  
   // disable unnecessary pin
   pinMode(MAG_INT, INPUT);
   pinMode(IMU_INT, INPUT);
@@ -74,6 +75,13 @@ void initializeSystem(){
   pinMode(LED1, INPUT);
 
   pinMode(GPS_FORCE_ON, INPUT); // open pin to allow GPS to go to sleep (backup mode)
+    
+  // power-on all peripheral
+  digitalWrite(PERIPHERAL_POWER_EN, LOW);
+  delay(1000);
+  digitalWrite(PERIPHERAL_POWER_EN, HIGH);
+  delay(1000);
+
 }
 
 void enableSensorCommunication() {
@@ -249,8 +257,8 @@ void setupVeml7700(){
   veml.setLowThreshold(10000);
   veml.setHighThreshold(20000);
   veml.interruptEnable(false);
+  veml.enable(false);
 }
-
 
 void setupLis3mdl(){
   
@@ -305,6 +313,7 @@ void setupLis3mdl(){
                           true, // polarity
                           false, // don't latch
                           false); // disable!
+
 }
 
 void setupLsm6ds0x(){
@@ -350,9 +359,9 @@ void setupLsm6ds0x(){
     break; // unsupported range for the DSOX
   }
 
-//  sox.setAccelDataRate(LSM6DS_RATE_12_5_HZ);
-  // disable accel
   sox.setAccelDataRate(LSM6DS_RATE_SHUTDOWN);
+//  sox.setAccelDataRate(LSM6DS_RATE_12_5_HZ);
+//  sox.setAccelDataRate(LSM6DS_RATE_6_66K_HZ);
   Serial.print("Accelerometer data rate set to: ");
   switch (sox.getAccelDataRate()) {
   case LSM6DS_RATE_SHUTDOWN:
@@ -390,9 +399,9 @@ void setupLsm6ds0x(){
     break;
   }
 
-//  sox.setGyroDataRate(LSM6DS_RATE_12_5_HZ);
-  // disable gyro
   sox.setGyroDataRate(LSM6DS_RATE_SHUTDOWN );
+//  sox.setGyroDataRate(LSM6DS_RATE_12_5_HZ);
+//  sox.setGyroDataRate(LSM6DS_RATE_6_66K_HZ);
   Serial.print("Gyro data rate set to: ");
   switch (sox.getGyroDataRate()) {
   case LSM6DS_RATE_SHUTDOWN:
@@ -429,6 +438,19 @@ void setupLsm6ds0x(){
     Serial.println("6.66 KHz");
     break;
   }
+
+  // ================= DEVEL =================
+  sox.setHighPerfAccel(false);
+  sox.setHighPerfGyro(false);
+//  // int as active high and push-pull mode
+//  sox.configIntOutputs(true, false);
+//
+//  // shake detect output on INT1
+//  sox.configInt1(false, false, false, true);
+//  
+//  // enable shake detection
+//  sox.enableWakeup(true);
+
 }
 
 void setupBme68x(){  
