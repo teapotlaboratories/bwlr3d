@@ -4,8 +4,6 @@
 #include "Adafruit_VEML7700.h"
 
 #define SEALEVELPRESSURE_HPA (1013.25)
-#define MS2_TO_G 0.10197162129
-#define RADS_TO_DEGS 57.2958
 
 // Teapot BWLR3D pins
 #define LED0                PA0
@@ -114,29 +112,23 @@ void readSensorData(){
   Serial.print(" \tZ: "); Serial.print(mag.magnetic.z); 
   Serial.print(" uTesla ");
 
-  /* Display the results (acceleration is measured in G) */
-  Serial.print(" | Accel X: ");
-  float accel_x = accel.acceleration.x*MS2_TO_G;
-  Serial.print(accel_x);
+  /* Display the results (acceleration is measured in m/s^2) */
+  Serial.print("Accel X: ");
+  Serial.print(accel.acceleration.x);
   Serial.print(" \tY: ");
-  float accel_y = accel.acceleration.y*MS2_TO_G;
-  Serial.print(accel_y);
+  Serial.print(accel.acceleration.y);
   Serial.print(" \tZ: ");
-  float accel_z = accel.acceleration.z*MS2_TO_G;
-  Serial.print(accel_z);
-  Serial.print(" G ");
+  Serial.print(accel.acceleration.z);
+  Serial.println(" m/s^2 ");
 
-  /* Display the results (rotation is measured in degree/s) */
-  Serial.print(" | Gyro X: ");
-  float gyro_x = gyro.gyro.x * RADS_TO_DEGS;
-  Serial.print(gyro_x);
+  /* Display the results (rotation is measured in rad/s) */
+  Serial.print("Gyro X: ");
+  Serial.print(gyro.gyro.x);
   Serial.print(" \tY: ");
-  float gyro_y = gyro.gyro.y * RADS_TO_DEGS;
-  Serial.print(gyro_y);
+  Serial.print(gyro.gyro.y);
   Serial.print(" \tZ: ");
-  float gyro_z = gyro.gyro.z * RADS_TO_DEGS;
-  Serial.print(gyro_z);
-  Serial.println(" degree/s ");
+  Serial.print(gyro.gyro.z);
+  Serial.println(" radians/s ");
 }
 
 void configureSensor(){
