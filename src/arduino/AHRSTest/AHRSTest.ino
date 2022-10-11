@@ -119,32 +119,32 @@ void loop(void)
 
   
   // Print the orientation filter output
-//  float roll = filter.getRoll();
-//  float pitch = filter.getPitch();
-//  float heading = filter.getYaw();
+  float roll = filter.getRoll();
+  float pitch = filter.getPitch();
+  float heading = filter.getYaw();
 //  Serial.print(millis());
-//  Serial.print("Orientation: ");
-//  Serial.print(pitch);
-//  Serial.print(", ");
-//  Serial.print(heading);
-//  Serial.print(". ");
-//  Serial.println(roll);
+  Serial.print("Orientation: ");
+  Serial.print(roll);
+  Serial.print(" ");
+  Serial.print(pitch);
+  Serial.print(" ");
+  Serial.println(heading);
 
 //
 //  // Print the orientation filter output in quaternions.
 //  // This avoids the gimbal lock problem with Euler angles when you get
 //  // close to 180 degrees (causing the model to rotate or flip, etc.)
-  float qw, qx, qy, qz;
-  filter.getQuaternion(&qw, &qx, &qy, &qz);
-  Serial.print(millis());
-  Serial.print("Quaternion: ");
-  Serial.print(qw);
-  Serial.print(", ");
-  Serial.print(qx);
-  Serial.print(", ");
-  Serial.print(qy);
-  Serial.print(", ");
-  Serial.println(qz);
+//  float qw, qx, qy, qz;
+//  filter.getQuaternion(&qw, &qx, &qy, &qz);
+//  Serial.print(millis());
+//  Serial.print("Quaternion: ");
+//  Serial.print(qw);
+//  Serial.print(", ");
+//  Serial.print(qx);
+//  Serial.print(", ");
+//  Serial.print(qy);
+//  Serial.print(", ");
+//  Serial.println(qz);
 
   delay(10);
 }
@@ -241,10 +241,10 @@ void configureSensor(){
 void setupLis3mdl(){
   
   /* setup LIS3MDL */
-  lis3mdl.setPerformanceMode(LIS3MDL_ULTRAHIGHMODE);
+  lis3mdl.setPerformanceMode(LIS3MDL_MEDIUMMODE);
   lis3mdl.setOperationMode(LIS3MDL_CONTINUOUSMODE);
-  lis3mdl.setDataRate(LIS3MDL_DATARATE_1000_HZ);  
-  lis3mdl.setRange(LIS3MDL_RANGE_16_GAUSS);
+  lis3mdl.setDataRate(LIS3MDL_DATARATE_10_HZ);  
+  lis3mdl.setRange(LIS3MDL_RANGE_4_GAUSS);
   lis3mdl.setIntThreshold(500);
   lis3mdl.configInterrupt(false, false, true, // enable z axis
                           true, // polarity
@@ -255,10 +255,10 @@ void setupLis3mdl(){
 void setupLsm6ds0x(){
  
   /* setup LSM6DSOX */
-  sox.setAccelRange(LSM6DS_ACCEL_RANGE_2_G);
-  sox.setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS );
-  sox.setAccelDataRate(LSM6DS_RATE_6_66K_HZ);
-  sox.setGyroDataRate(LSM6DS_RATE_6_66K_HZ);
+  sox.setAccelRange(LSM6DS_ACCEL_RANGE_4_G);
+  sox.setGyroRange(LSM6DS_GYRO_RANGE_250_DPS );
+  sox.setAccelDataRate(LSM6DS_RATE_12_5_HZ);
+  sox.setGyroDataRate(LSM6DS_RATE_12_5_HZ);
 }
 
 void setupBme68x(){  
