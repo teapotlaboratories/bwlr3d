@@ -5,6 +5,13 @@
   )
 
   (paper "A4")
+  (title_block
+    (title "Teapot BWLR3D")
+    (date "2022-11-08")
+    (rev "1")
+    (company "Teapot Laboratories")
+  )
+
   (layers
     (0 "F.Cu" signal)
     (31 "B.Cu" signal)
