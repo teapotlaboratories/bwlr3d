@@ -8,8 +8,8 @@
 #include "Adafruit_VEML7700.h"
 #include "TinyGPSPlus.h"
 
-/* board revision */
-#define BOARD_REVISION  0x02
+// configuration for teapot bwlr3d application
+#include "TeapotBWLR3DConfig.h"
 
 /* pin definition */
 #define RED_LED               PA0
@@ -36,6 +36,11 @@
   #error "invalid BOARD_REVISION value"
 #endif
 
+#ifndef ADC_TO_BATTERY
+  #error "ADC_TO_BATTERY not set"
+#endif
+
+/* application definition */
 namespace teapot{
 namespace bwlr3d {
   enum class ReturnCode {
@@ -95,6 +100,7 @@ namespace bwlr3d {
       ReturnCode    EnableLed( Led led, bool enable );
       ReturnCode    EnableGnss( bool enable );
       int           ReadBatteryAdc();
+      float         ReadBatteryVoltage();
       ReturnCode    GetSensorData( SensorData& data );
       void          ResetGnssData();
       ReturnCode    ProcessGnssStream(float hdop, uint32_t sat, unsigned long ms);
@@ -105,6 +111,7 @@ namespace bwlr3d {
 } // namespace teapot
 
 
+/* lora payload definition */
 namespace teapot{
 namespace bwlr3d {
 namespace payload {

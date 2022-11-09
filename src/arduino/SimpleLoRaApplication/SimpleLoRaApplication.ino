@@ -43,6 +43,7 @@ void setup(void) {
 }
 bool first_fix = false;
 void loop() {
+  // TODO: finalize example code
 //  /* sleep device */
 //  Serial.printf("Try sleep %ums..", kOtaaPeriod);
 //  app.EnableGnss( false );

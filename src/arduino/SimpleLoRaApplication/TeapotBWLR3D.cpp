@@ -1,10 +1,12 @@
 #include "TeapotBWLR3D.h"
 #include <CRC32.h>
 
+/* application implementation */
 namespace teapot {
 namespace bwlr3d {
   Application::Application(){}
-  void Application::Initialize() {    
+  void Application::Initialize()
+  {    
     // disable unnecessary pin
     pinMode(MAG_INT, INPUT);
     pinMode(IMU_INT, INPUT);
@@ -33,11 +35,17 @@ namespace bwlr3d {
     delay( 1000 );
   }
 
-  int Application::ReadBatteryAdc(){
+  int Application::ReadBatteryAdc()
+  {
     digitalWrite(BATT_MEASURE_EN, HIGH);
     const int battery_adc = analogRead( BATT_MEASURE );
     digitalWrite(BATT_MEASURE_EN, LOW);
     return battery_adc;
+  }
+
+  float Application::ReadBatteryVoltage()
+  {
+    return ((float) ReadBatteryAdc()) * ADC_TO_BATTERY;
   }
 
   void Application::ResetGnssData()
@@ -45,7 +53,8 @@ namespace bwlr3d {
     this->l86 = TinyGPSPlus();
   }
   
-  ReturnCode Application::EnableGnss( bool enable ){
+  ReturnCode Application::EnableGnss( bool enable )
+  {
     if( !this->enable_peripheral )
     {
       return ReturnCode::kPeripheralOff;
@@ -132,21 +141,24 @@ namespace bwlr3d {
     }
   }
   
-  void Application::SetupLis3mdl(){
+  void Application::SetupLis3mdl()
+  {
     this->lis3mdl.setPerformanceMode(LIS3MDL_LOWPOWERMODE);
     this->lis3mdl.setOperationMode(LIS3MDL_SINGLEMODE);
     this->lis3mdl.setDataRate(LIS3MDL_DATARATE_1_25_HZ);    
     this->lis3mdl.setRange(LIS3MDL_RANGE_4_GAUSS);
   }
   
-  void Application::SetupLsm6dsox(){
+  void Application::SetupLsm6dsox()
+  {
     this->lsm6dsox.setAccelRange(LSM6DS_ACCEL_RANGE_2_G);
     this->lsm6dsox.setGyroRange(LSM6DS_GYRO_RANGE_250_DPS );
     this->lsm6dsox.setAccelDataRate(LSM6DS_RATE_12_5_HZ);
     this->lsm6dsox.setGyroDataRate(LSM6DS_RATE_12_5_HZ);
   }
   
-  void Application::SetupBme68x(){  
+  void Application::SetupBme68x()
+  {  
     // Set up oversampling and filter initialization
     this->bme68x.setTemperatureOversampling(BME680_OS_8X);
     this->bme68x.setHumidityOversampling(BME680_OS_2X);
@@ -155,7 +167,8 @@ namespace bwlr3d {
     this->bme68x.setGasHeater(320, 150); // 320*C for 150 ms
   }
  
-  ReturnCode Application::ConfigureSensor(){
+  ReturnCode Application::ConfigureSensor()
+  {
     
     /* configure LIS3MDL */
     if (! this->lis3mdl.begin_I2C(0x1E, &Wire)) {
@@ -182,7 +195,8 @@ namespace bwlr3d {
     return ReturnCode::kOk;
   }
   
-  ReturnCode Application::GetSensorData( SensorData& data ){    
+  ReturnCode Application::GetSensorData( SensorData& data )
+  {    
     if( !this->enable_peripheral )
     {
       return ReturnCode::kPeripheralOff;
@@ -233,6 +247,7 @@ namespace bwlr3d {
 } // namespace bwlr3d 
 } // namespace teapot
 
+/* lora payload implementation */
 namespace teapot{
 namespace bwlr3d {
 namespace payload {
@@ -295,6 +310,8 @@ namespace payload {
     memcpy( data, &(this->data), sizeof(this->data) );
     return( sizeof(this->data) );
   }
+
+  // TODO: implement lora payload for gnss
 
 } // namespace payload 
 } // namespace bwlr3d 
