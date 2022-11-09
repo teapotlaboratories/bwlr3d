@@ -10,8 +10,8 @@
 #define I2C_SDA             PA11
 #define I2C_SCL             PA12
 #define MAG_INT             PB3
-#define IMU_INT             PB4   // new rev is PA10
-#define BATT_MEASURE        PA10  // new rev is PB4
+#define IMU_INT             PA10   // new rev is PA10
+#define BATT_MEASURE        PB4  // new rev is PB4
 
 void setup()
 {
@@ -37,7 +37,8 @@ void initializeSystem(){
   Serial.begin(115200);
 
   // power-off all peripheral
-  pinMode(PERIPHERAL_POWER_EN, INPUT);
+  pinMode(PERIPHERAL_POWER_EN, OUTPUT);
+  digitalWrite(PERIPHERAL_POWER_EN, LOW);
   
   // disable sensor communication
   disableSensorCommunication();
@@ -47,9 +48,12 @@ void initializeSystem(){
   pinMode(IMU_INT, INPUT);
   pinMode(POWER_STATUS, INPUT);
   pinMode(BATT_MEASURE, INPUT);
-  pinMode(BATT_MEASURE_EN, INPUT);
-  pinMode(LED0, INPUT);
-  pinMode(LED1, INPUT);
+  pinMode(BATT_MEASURE_EN, OUTPUT);
+  digitalWrite(BATT_MEASURE_EN, LOW);
+  pinMode(LED0, OUTPUT);
+  digitalWrite(LED0, HIGH);
+  pinMode(LED1, OUTPUT);
+  digitalWrite(LED1, HIGH);
 
   pinMode(GPS_FORCE_ON, INPUT); // open pin to allow GPS to go to sleep (backup mode)
     

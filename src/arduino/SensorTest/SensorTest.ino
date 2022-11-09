@@ -2,10 +2,11 @@
 #include "Adafruit_LSM6DSOX.h"
 #include "Adafruit_BME680.h"
 #include "Adafruit_VEML7700.h"
+#include <TinyGPSPlus.h>
 
 #define SEALEVELPRESSURE_HPA (1013.25)
-
 uint16_t errorsAndWarnings = 0;
+#define BOARD_REVISION  (0x02)
 
 // Teapot BWLR3D pins
 #define LED0                PA0
@@ -19,18 +20,34 @@ uint16_t errorsAndWarnings = 0;
 #define I2C_SDA             PA11
 #define I2C_SCL             PA12
 #define MAG_INT             PB3
-#define IMU_INT             PB4   // new rev is PA10
-#define BATT_MEASURE        PA10  // new rev is PB4
+
+#if BOARD_REVISION == (0x01)
+  #define IMU_INT             PB4
+  #define BATT_MEASURE        PA10
+#elif BOARD_REVISION == (0x02)
+  #define IMU_INT             PA10
+  #define BATT_MEASURE        PB4
+#else
+  #ifndef BOARD_REVISION
+    #error "BOARD_REVISION not set"
+  #endif
+  #error "invalid BOARD_REVISION value"
+#endif
+
+#define IMU_INT             PA10   // new rev is PA10
+#define BATT_MEASURE        PB4  // new rev is PB4
 
 Adafruit_LSM6DSOX sox;
 Adafruit_LIS3MDL lis3mdl;
 Adafruit_BME680 bme; // I2C
 Adafruit_VEML7700 veml;
+TinyGPSPlus gps;
+
 void setup(void) {
   /* initialize system pin */
   initializeSystem();
   /* initialize sensor */
-  enableSensorCommunication();
+  powerPeripheral(true);
   /* configure sensor settings */
   configureSensor();
   
@@ -45,12 +62,13 @@ void setup(void) {
 
 void loop() {  
   /* disable sensor comm and then sleep */
-  disableSensorCommunication();
+  powerPeripheral(false);
   api.system.sleep.all(10000);
-
+  
   Serial.println();
   Serial.println("================ Sensor Wakes Up ================");
-  enableSensorCommunication();
+  powerPeripheral(true);
+  configureSensor();
   /* read sensor data */
   readSensorData();
 }
@@ -84,26 +102,6 @@ void initializeSystem(){
 
 }
 
-void enableSensorCommunication() {
-  // enable GPS serial
-  Serial1.begin(9600);
-  
-  // enable sensor I2C bus
-  Wire.begin();
-}
-
-void disableSensorCommunication() {
-  // disable GPS serial
-  Serial1.end();
-  pinMode(GPS_TXD, INPUT);
-  pinMode(GPS_RXD, INPUT);
-
-  // disable I2C
-  Wire.end();
-  pinMode(I2C_SDA, INPUT);
-  pinMode(I2C_SCL, INPUT);
-}
-
 void readSensorData(){
   /* Get a new normalized sensor event */
   sensors_event_t accel;
@@ -114,9 +112,7 @@ void readSensorData(){
 
   /* Read lux sensor */
   Serial.println("================ VEML7700 Sensor ================");
-  Serial.print("raw ALS: "); Serial.println(veml.readALS());
-  Serial.print("raw white: "); Serial.println(veml.readWhite());
-  Serial.print("lux: "); Serial.println(veml.readLux());
+  Serial.print("lux: "); Serial.println(veml.readLux(VEML_LUX_AUTO));
 
   /* Read Mag sensor */
   Serial.println("================ LIS3MDL Sensor ================");
@@ -229,35 +225,8 @@ void configureSensor(){
     }
   }
   Serial.println("VEML7700 Found!");
-  setupVeml7700();
+  // set to auto
   Serial.println();
-}
-
-void setupVeml7700(){
-  
-  Serial.println("Setup VEML7700");
-  Serial.print(F("Gain: "));
-  switch (veml.getGain()) {
-    case VEML7700_GAIN_1: Serial.println("1"); break;
-    case VEML7700_GAIN_2: Serial.println("2"); break;
-    case VEML7700_GAIN_1_4: Serial.println("1/4"); break;
-    case VEML7700_GAIN_1_8: Serial.println("1/8"); break;
-  }
-
-  Serial.print(F("Integration Time (ms): "));
-  switch (veml.getIntegrationTime()) {
-    case VEML7700_IT_25MS: Serial.println("25"); break;
-    case VEML7700_IT_50MS: Serial.println("50"); break;
-    case VEML7700_IT_100MS: Serial.println("100"); break;
-    case VEML7700_IT_200MS: Serial.println("200"); break;
-    case VEML7700_IT_400MS: Serial.println("400"); break;
-    case VEML7700_IT_800MS: Serial.println("800"); break;
-  }
-
-  veml.setLowThreshold(10000);
-  veml.setHighThreshold(20000);
-  veml.interruptEnable(false);
-  veml.enable(false);
 }
 
 void setupLis3mdl(){
@@ -272,7 +241,7 @@ void setupLis3mdl(){
     case LIS3MDL_ULTRAHIGHMODE: Serial.println("Ultra-High"); break;
   }
 
-  lis3mdl.setOperationMode(LIS3MDL_POWERDOWNMODE);
+  lis3mdl.setOperationMode(LIS3MDL_SINGLEMODE);
   Serial.print("Operation mode set to: ");
   // Single shot mode will complete conversion and go into power down
   switch (lis3mdl.getOperationMode()) {
@@ -281,7 +250,7 @@ void setupLis3mdl(){
     case LIS3MDL_POWERDOWNMODE: Serial.println("Power-down"); break;
   }
 
-  lis3mdl.setDataRate(LIS3MDL_DATARATE_0_625_HZ);
+  lis3mdl.setDataRate(LIS3MDL_DATARATE_1_25_HZ);
   // You can check the datarate by looking at the frequency of the DRDY pin
   Serial.print("Data rate set to: ");
   switch (lis3mdl.getDataRate()) {
@@ -320,7 +289,7 @@ void setupLsm6ds0x(){
   
   Serial.println("Setup LSM6DSOX");
   /* setup LSM6DSOX */
-  // sox.setAccelRange(LSM6DS_ACCEL_RANGE_2_G);
+  sox.setAccelRange(LSM6DS_ACCEL_RANGE_2_G);
   Serial.print("Accelerometer range set to: ");
   switch (sox.getAccelRange()) {
   case LSM6DS_ACCEL_RANGE_2_G:
@@ -337,7 +306,7 @@ void setupLsm6ds0x(){
     break;
   }
 
-  // sox.setGyroRange(LSM6DS_GYRO_RANGE_250_DPS );
+   sox.setGyroRange(LSM6DS_GYRO_RANGE_250_DPS );
   Serial.print("Gyro range set to: ");
   switch (sox.getGyroRange()) {
   case LSM6DS_GYRO_RANGE_125_DPS:
@@ -359,9 +328,7 @@ void setupLsm6ds0x(){
     break; // unsupported range for the DSOX
   }
 
-  sox.setAccelDataRate(LSM6DS_RATE_SHUTDOWN);
-//  sox.setAccelDataRate(LSM6DS_RATE_12_5_HZ);
-//  sox.setAccelDataRate(LSM6DS_RATE_6_66K_HZ);
+  sox.setAccelDataRate(LSM6DS_RATE_12_5_HZ);
   Serial.print("Accelerometer data rate set to: ");
   switch (sox.getAccelDataRate()) {
   case LSM6DS_RATE_SHUTDOWN:
@@ -399,9 +366,7 @@ void setupLsm6ds0x(){
     break;
   }
 
-  sox.setGyroDataRate(LSM6DS_RATE_SHUTDOWN );
-//  sox.setGyroDataRate(LSM6DS_RATE_12_5_HZ);
-//  sox.setGyroDataRate(LSM6DS_RATE_6_66K_HZ);
+  sox.setGyroDataRate(LSM6DS_RATE_12_5_HZ);
   Serial.print("Gyro data rate set to: ");
   switch (sox.getGyroDataRate()) {
   case LSM6DS_RATE_SHUTDOWN:
@@ -471,16 +436,44 @@ static void setGPSToBackupMode()
   const char tr[] = {0xD, 0xA};
   base_backup_mode_command.getBytes(backup_mode_command, sizeof(backup_mode_command));
   memcpy(backup_mode_command+13, tr, 2); 
-
-  // for debug, print actual backup mode command
-//  Serial.print("Backup Mode Command: ");
-//  for( int i = 0; i < sizeof(backup_mode_command); i++ ) {  
-//    Serial.print("0x");
-//    Serial.print(backup_mode_command[i],HEX);
-//    Serial.print(" ");
-//  }
-//  Serial.println();
   
   Serial.println("Set GPS to Backup mode");
   Serial1.write(backup_mode_command, sizeof(backup_mode_command));
+}
+
+void powerPeripheral(bool power){
+  if( power ){
+    
+    enableSensorCommunication();
+    pinMode(PERIPHERAL_POWER_EN, OUTPUT);
+    digitalWrite(PERIPHERAL_POWER_EN, HIGH);
+  } else {
+    
+    disableSensorCommunication();    
+    pinMode(PERIPHERAL_POWER_EN, OUTPUT);
+    digitalWrite(PERIPHERAL_POWER_EN, LOW);
+    delay( 1000 );
+    pinMode(PERIPHERAL_POWER_EN, INPUT);  
+  }
+  delay( 1000 );
+}
+
+void enableSensorCommunication() {
+  // enable GPS serial
+  Serial1.begin(9600);
+  
+  // enable sensor I2C bus
+  Wire.begin();
+}
+
+void disableSensorCommunication() {
+  // disable GPS serial
+  Serial1.end();
+  pinMode(GPS_TXD, INPUT);
+  pinMode(GPS_RXD, INPUT);
+
+  // disable I2C
+  Wire.end();
+  pinMode(I2C_SDA, INPUT);
+  pinMode(I2C_SCL, INPUT);
 }

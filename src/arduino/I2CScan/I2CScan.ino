@@ -36,8 +36,8 @@
 #define I2C_SDA             PA11
 #define I2C_SCL             PA12
 #define MAG_INT             PB3
-#define IMU_INT             PB4   // new rev is PA10
-#define BATT_MEASURE        PA10  // new rev is PB4
+#define IMU_INT             PA10   // new rev is PA10
+#define BATT_MEASURE        PB4  // new rev is PB4
 
 void setup() {
   
@@ -49,7 +49,8 @@ void setup() {
   
   // power-on all peripheral
   pinMode(PERIPHERAL_POWER_EN, OUTPUT);
-  digitalWrite(PERIPHERAL_POWER_EN, HIGH);  
+  digitalWrite(PERIPHERAL_POWER_EN, HIGH); 
+  delay(2000); 
 }
 
 void loop()

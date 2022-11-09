@@ -17,8 +17,8 @@
 #define I2C_SDA             PA11
 #define I2C_SCL             PA12
 #define MAG_INT             PB3
-#define IMU_INT             PB4   // new rev is PA10
-#define BATT_MEASURE        PA10  // new rev is PB4
+#define IMU_INT             PA10   // new rev is PA10
+#define BATT_MEASURE        PB4  // new rev is PB4
 
 Adafruit_LSM6DSOX sox;
 Adafruit_LIS3MDL lis3mdl;
