@@ -122,6 +122,9 @@ void Initialize(){
 
 int ReadBatteryAdc()
 {
+  // TODO: investigate. it seems pin always disabled at every loop.
+  //       always set to output at every ADC read.
+  pinMode(BATT_MEASURE_EN, OUTPUT);
   digitalWrite(BATT_MEASURE_EN, HIGH);
   const int battery_adc = analogRead( BATT_MEASURE );
   digitalWrite(BATT_MEASURE_EN, LOW);
@@ -133,6 +136,13 @@ float ReadBatteryVoltage()
   return ((float) ReadBatteryAdc()) * ADC_TO_BATTERY;
 }
 
+bool ReadPowerStatus()
+{
+  // TODO: investigate. it seems pin always disabled at every loop.
+  //       always set to input at every digital read.
+  pinMode(POWER_STATUS, INPUT);
+  return digitalRead(POWER_STATUS);
+}
 /* Teapot BWLR3D Base System Control */
 
 void setup() {
@@ -143,7 +153,12 @@ void setup() {
   Initialize();
 }
 
+// unplug battery while the test is running.
+// resulted in power status to show as 0 at the last print
+//#define POWER_STATUS_TEST
+
 void loop() {
+#ifndef POWER_STATUS_TEST
   // blink led
   digitalWrite(GREEN_LED, LOW);
   digitalWrite(RED_LED, HIGH);
@@ -158,6 +173,10 @@ void loop() {
 
   int   batt_measure_adc  = ReadBatteryAdc();
   float batt_measure_volt = batt_measure_adc * ADC_TO_BATTERY;
-  Serial.printf("Power Status: %d, Battery Voltage ADC: %d, Battery Voltage: %f\n", digitalRead(POWER_STATUS), batt_measure_adc, batt_measure_volt);
+  Serial.printf("Battery Voltage ADC: %d, Battery Voltage: %f\n", batt_measure_adc, batt_measure_volt);
   delay(1000);
+#else
+  Serial.printf("Power Status: %d\n", ReadPowerStatus());
+  delay(50);
+#endif
 }

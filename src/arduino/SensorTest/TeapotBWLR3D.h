@@ -60,15 +60,6 @@ namespace bwlr3d {
     kGreen = 0,
     kRed,
   };
-
-  enum class Sensor {
-    kNone     = 0b0,
-    kAll      = 0b1111,
-    kLis3mdl  = 0b1,
-    kLsm6dsox = 0b10,
-    kVeml7700 = 0b100,
-    kBme68x   = 0b1000,
-  };
  
   struct SensorData {
     // Temperature (Celsius)
@@ -111,7 +102,7 @@ namespace bwlr3d {
       int           ReadBatteryAdc();
       float         ReadBatteryVoltage();
       bool          ReadPowerStatus();
-      ReturnCode    GetSensorData( SensorData& data, Sensor sensor_selection = Sensor::kAll );
+      ReturnCode    GetSensorData( SensorData& data );
       void          ResetGnssData();
       ReturnCode    ProcessGnssStream(float hdop, uint32_t sat, unsigned long ms);
       TinyGPSPlus&  GetGnssData();
@@ -148,8 +139,7 @@ namespace payload {
     float z;
   } __attribute__((packed));
 
-  /* Payload Definition */  
-  /* environmental payload */
+  /* Payload Definition */
   class Environmental {
     struct Frame {
       Header header;
@@ -164,17 +154,14 @@ namespace payload {
     const Type type = teapot::bwlr3d::payload::Type::kEnvironmental;
     Frame data;
     public:
-      Environmental( 
-        float temperature,
-        uint32_t pressure,
-        float humidity,
-        uint32_t gas_resistance,
-        float lux 
-      );
+      Environmental( float temperature,
+                     uint32_t pressure,
+                     float humidity,
+                     uint32_t gas_resistance,
+                     float lux );
       size_t GetAsBytes(uint8_t* data, size_t size);
   };
 
-  /* imu payload */
   class Imu {
     struct Frame {
       Header header;
@@ -190,31 +177,16 @@ namespace payload {
       size_t GetAsBytes(uint8_t* data, size_t size);    
   };
   
-  /* gnss payload */
-  class Gnss {
-    struct Frame {
-      Header header;
-      uint32_t timestamp;
-      uint16_t satellite; 
-      float hdop;
-      double latitude;
-      double longitude;
-      double altitude;
-      Trailer trailer;    
-    } __attribute__((packed));
-    const Type type = teapot::bwlr3d::payload::Type::kGnss;
-    Frame data;
-    public:
-      Gnss( 
-        const uint32_t timestamp,
-        uint16_t satellite,
-        float hdop,
-        double latitude,
-        double longitude,
-        double altitude
-      );
-      size_t GetAsBytes(uint8_t* data, size_t size);
-  };  
+  struct Gnss {
+    Header header;
+    uint32_t timestamp;
+    uint16_t satellite; 
+    float hdop;
+    double latitude;
+    double longitude;
+    double altitude;
+    Trailer trailer;    
+  } __attribute__((packed));
 
 } // namespace payload 
 } // namespace bwlr3d 

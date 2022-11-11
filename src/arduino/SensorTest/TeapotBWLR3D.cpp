@@ -4,11 +4,6 @@
 /* application implementation */
 namespace teapot {
 namespace bwlr3d {
-
-  Sensor operator|(Sensor m, Sensor n){
-    return m;
-  }
-  
   Application::Application(){}
   void Application::Initialize()
   {    
@@ -211,7 +206,7 @@ namespace bwlr3d {
     return ReturnCode::kOk;
   }
   
-  ReturnCode Application::GetSensorData( SensorData& data, Sensor sensor_selection )
+  ReturnCode Application::GetSensorData( SensorData& data )
   {    
     if( !this->enable_peripheral )
     {
@@ -267,7 +262,7 @@ namespace bwlr3d {
 namespace teapot{
 namespace bwlr3d {
 namespace payload {
-  /* environmental payload */
+  
   Environmental::Environmental( float temperature,
                                 uint32_t pressure,
                                 float humidity,
@@ -286,7 +281,7 @@ namespace payload {
     // calculate CRC32
     size_t frame_size = sizeof(this->data);
     size_t payload_wo_crc32_size = frame_size - sizeof(this->data.trailer.checksum);
-    this->data.trailer.checksum = CRC32::calculate(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc32_size);    
+    this->data.trailer.checksum = CRC32::calculate(&(this->data), payload_wo_crc32_size);    
   }
   
   size_t Environmental::GetAsBytes(uint8_t* data, size_t size)
@@ -300,6 +295,7 @@ namespace payload {
     return( sizeof(this->data) );
   }
 
+  
   Imu::Imu( const Vector& mag, const Vector& accel, const Vector& gyro  )
   {
     // set data
@@ -312,7 +308,7 @@ namespace payload {
     // calculate CRC32
     size_t frame_size = sizeof(this->data);
     size_t payload_wo_crc32_size = frame_size - sizeof(this->data.trailer.checksum);
-    this->data.trailer.checksum = CRC32::calculate(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc32_size);    
+    this->data.trailer.checksum = CRC32::calculate(&(this->data), payload_wo_crc32_size);    
   }
   
   size_t Imu::GetAsBytes(uint8_t* data, size_t size)
@@ -326,42 +322,7 @@ namespace payload {
     return( sizeof(this->data) );
   }
 
-  /* gnss payload */
-  Gnss::Gnss( 
-        const uint32_t timestamp,
-        uint16_t satellite,
-        float hdop,
-        double latitude,
-        double longitude,
-        double altitude
-  )
-  {
-    // set data
-    this->data.header.version = kVersion;
-    this->data.header.type = static_cast<uint32_t>(this->type);
-    this->data.timestamp = timestamp;
-    this->data.satellite = satellite;
-    this->data.hdop = hdop;
-    this->data.latitude = latitude;
-    this->data.longitude = longitude;
-    this->data.altitude = altitude;
-
-    // calculate CRC32
-    size_t frame_size = sizeof(this->data);
-    size_t payload_wo_crc32_size = frame_size - sizeof(this->data.trailer.checksum);
-    this->data.trailer.checksum = CRC32::calculate(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc32_size);    
-  }
-  
-  size_t Gnss::GetAsBytes(uint8_t* data, size_t size)
-  {
-    if( data == nullptr || size < sizeof(this->data) )
-    {
-      return 0;
-    }
-    
-    memcpy( data, &(this->data), sizeof(this->data) );
-    return( sizeof(this->data) );
-  }
+  // TODO: implement lora payload for gnss
 
 } // namespace payload 
 } // namespace bwlr3d 

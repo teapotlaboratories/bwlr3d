@@ -124,6 +124,9 @@ void Initialize(){
 
 int ReadBatteryAdc()
 {
+  // TODO: investigate. it seems pin always disabled at every loop.
+  //       always set to output at every ADC read.
+  pinMode(BATT_MEASURE_EN, OUTPUT);
   digitalWrite(BATT_MEASURE_EN, HIGH);
   const int battery_adc = analogRead( BATT_MEASURE );
   digitalWrite(BATT_MEASURE_EN, LOW);
@@ -133,6 +136,14 @@ int ReadBatteryAdc()
 float ReadBatteryVoltage()
 {
   return ((float) ReadBatteryAdc()) * ADC_TO_BATTERY;
+}
+
+bool ReadPowerStatus()
+{
+  // TODO: investigate. it seems pin always disabled at every loop.
+  //       always set to input at every digital read.
+  pinMode(POWER_STATUS, INPUT);
+  return digitalRead(POWER_STATUS);
 }
 /* Teapot BWLR3D Base System Control */
 
@@ -159,7 +170,8 @@ void setup()
 
 
 uint32_t start_time;
-uint32_t stop_at_time = 600000; // disable GPS every 10 minute
+//uint32_t stop_at_time = 600000; // disable GPS every 10 minute
+uint32_t stop_at_time = 60000; // disable GPS every 1 minute
 uint32_t sleep_time = 5000; // sleep for 5 seconds
 void loop()
 {
