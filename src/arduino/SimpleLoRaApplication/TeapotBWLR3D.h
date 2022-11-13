@@ -61,15 +61,17 @@ namespace bwlr3d {
     kRed,
   };
 
-  enum class Sensor {
+  enum class Sensor : uint32_t {
     kNone     = 0b0,
     kAll      = 0b1111,
     kLis3mdl  = 0b1,
     kLsm6dsox = 0b10,
     kVeml7700 = 0b100,
-    kBme68x   = 0b1000,
+    kBme68x   = 0b1000
   };
- 
+  uint32_t operator|( const Sensor m, const Sensor n );  
+  uint32_t operator&( const uint32_t m, const Sensor n );  
+  
   struct SensorData {
     // Temperature (Celsius)
     float temperature;
@@ -111,8 +113,23 @@ namespace bwlr3d {
       int           ReadBatteryAdc();
       float         ReadBatteryVoltage();
       bool          ReadPowerStatus();
-      ReturnCode    GetSensorData( SensorData& data, Sensor sensor_selection = Sensor::kAll );
+      ReturnCode    GetSensorData( SensorData& data, uint32_t sensor );
+      ReturnCode    GetSensorData( SensorData& data, Sensor sensor = Sensor::kAll );
       void          ResetGnssData();
+      
+      /**
+       * Process incoming GNSS NMEA stream from Serial1.
+       *
+       * Process and busy wait until receive hdop value at or below target
+       * and number of satellite at or above target.
+       * Process returns kTimeout if the process is not able to achieve target
+       * for `ms` time
+       *
+       * @param hdop Target HDOP value
+       * @param sat Target number of satellite
+       * @param ms Timeout in milliseconds to reach the target value
+       * @return `kOk` if target reached, or `kTimeout` if timeout reached
+       */
       ReturnCode    ProcessGnssStream(float hdop, uint32_t sat, unsigned long ms);
       TinyGPSPlus&  GetGnssData();
   };

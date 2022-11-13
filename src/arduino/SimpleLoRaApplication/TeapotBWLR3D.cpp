@@ -5,8 +5,11 @@
 namespace teapot {
 namespace bwlr3d {
 
-  Sensor operator|(Sensor m, Sensor n){
-    return m;
+  uint32_t operator|( const Sensor m, const Sensor n ){
+    return ( static_cast<uint32_t>(m) | static_cast<uint32_t>(n) ) ;
+  }
+  uint32_t operator&( const uint32_t m, const Sensor n ){
+    return ( m & static_cast<uint32_t>(n) ) ;
   }
   
   Application::Application(){}
@@ -211,33 +214,49 @@ namespace bwlr3d {
     return ReturnCode::kOk;
   }
   
-  ReturnCode Application::GetSensorData( SensorData& data, Sensor sensor_selection )
+  ReturnCode Application::GetSensorData( SensorData& data, uint32_t sensor )
   {    
     if( !this->enable_peripheral )
     {
       return ReturnCode::kPeripheralOff;
     }
-      
+
     /* Read LIS3MDL sensor */
-    this->lis3mdl.getEvent(&data.mag);
-  
+    if( sensor & Sensor::kLis3mdl )
+    {   
+      this->lis3mdl.getEvent(&data.mag);
+    }
+    
     /* Read LSM6DS0X sensor */
-    sensors_event_t unused_temp;
-    this->lsm6dsox.getEvent(&data.accel, &data.gyro, &unused_temp);
-  
+    if( sensor & Sensor::kLsm6dsox )
+    {   
+      sensors_event_t unused_temp;
+      this->lsm6dsox.getEvent(&data.accel, &data.gyro, &unused_temp);
+    }
+    
     /* Read VEML7700 sensor */
-    data.lux = this->veml7700.readLux(VEML_LUX_AUTO);
+    if( sensor & Sensor::kVeml7700 )
+    {
+      data.lux = this->veml7700.readLux(VEML_LUX_AUTO);
+    }
     
     /* Read BME68x sensor */
-    if ( !this->bme68x.performReading()) {
-      return ReturnCode::kBme68xReadFail;
+    if( sensor & Sensor::kBme68x )
+    {
+      if ( !this->bme68x.performReading()) {
+        return ReturnCode::kBme68xReadFail;
+      }
+      data.temperature      = bme68x.temperature;
+      data.pressure         = bme68x.pressure;
+      data.humidity         = bme68x.humidity;
+      data.gas_resistance   = bme68x.gas_resistance;  
     }
-    data.temperature      = bme68x.temperature;
-    data.pressure         = bme68x.pressure;
-    data.humidity         = bme68x.humidity;
-    data.gas_resistance   = bme68x.gas_resistance;
-    
     return ReturnCode::kOk;
+  }
+
+  ReturnCode Application::GetSensorData( SensorData& data, Sensor sensor )
+  {
+    return GetSensorData( data, static_cast<uint32_t>( sensor ) );
   }
   
   ReturnCode Application::ProcessGnssStream(float hdop, uint32_t sat, unsigned long ms)

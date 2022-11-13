@@ -7,7 +7,8 @@ const uint8_t kOtaaAppKey[16] = {0x3d, 0xbe, 0x8c, 0xc0, 0x87, 0x77, 0x5c, 0x9e,
 const RAK_LORA_BAND kOtaaBand = RAK_REGION_US915;
 //const uint32_t kOtaaPeriod      = (600*1000); // 10 minute 
 //const uint32_t kOtaaPeriod      = (10*1000); // 10 seconds
-const uint32_t kOtaaPeriod      = (30*1000); // 30 seconds
+//const uint32_t kOtaaPeriod      = (30*1000); // 30 seconds
+const uint32_t kOtaaPeriod      = (300*1000); // 5 minute
 
 teapot::connection::Lorawan lora( kOtaaDevEui, sizeof(kOtaaDevEui),
                                   kOtaaAppEui, sizeof(kOtaaAppEui),
@@ -43,19 +44,27 @@ void setup(void) {
   app.ResetGnssData();
 }
 bool first_fix = false;
+bool first_loop = true;
 void loop() {
-//   TODO: finalize example code
-  /* sleep device */
-  Serial.printf("Try sleep %ums..\r\n", kOtaaPeriod);
-  app.EnableGnss( false );
-  app.EnablePeripheral( false );
-  api.system.sleep.all(kOtaaPeriod);
-  Serial.println("Wakeup..");
+  /* skip sleeping on first loop */
+  if( !first_loop )
+  {
+    /* power-off all sensor */
+    Serial.printf("Try sleep %ums..\r\n", kOtaaPeriod);
+    app.EnableGnss( false );
+    app.EnablePeripheral( false );
+    
+    /* sleep device */
+    api.system.sleep.all(kOtaaPeriod);
+    Serial.println("Wakeup..");
+    
+    /* power-on all sensor */
+    app.EnablePeripheral( true );
+    app.EnableGnss( true );
+    app.ResetGnssData();
+  }
+  first_loop = false;
   
-  /* power-on all sensor and get environmental sensor data */
-  app.EnablePeripheral( true );
-  app.EnableGnss( true );
-  app.ResetGnssData();
   delay( 500 );
   if( app.ConfigureSensor() != teapot::bwlr3d::ReturnCode::kOk )
   {
@@ -68,9 +77,7 @@ void loop() {
     Serial.println("failed to read sensor data");
     return; 
   }
-
-  teapot::bwlr3d::Sensor test = teapot::bwlr3d::Sensor::kVeml7700 | teapot::bwlr3d::Sensor::kLis3mdl;
-
+  
   // Process GNSS Stream
 //  app.ProcessGnssStream(5,0,60000);
 
@@ -105,7 +112,7 @@ void loop() {
   
 
 ///* for gps testing */
-//  const uint32_t temp_otaa_period = 10000;
+//  const uint32_t temp_otaa_period = 300 * 1000;
 //  if( !first_fix )
 //  {    
 //    app.ResetGnssData();
@@ -135,12 +142,16 @@ void loop() {
 //    Serial.print("Time: "); print_date_time(app.GetGnssData().date, app.GetGnssData().time);
 //    Serial.print(" | HDOP: ");print_float(app.GetGnssData().hdop.hdop(), app.GetGnssData().hdop.isValid(), 6, 1);
 //    Serial.print(" | Satellites: "); print_int(app.GetGnssData().satellites.value(), app.GetGnssData().satellites.isValid(), 5); Serial.println();
-//  
-//    Serial.printf("Try sleep %ums..", temp_otaa_period);
-//    api.system.sleep.all(temp_otaa_period);
-//    Serial.println("Wakeup..");
 //    return;
 //  }
+//  
+//  Serial.printf("Try sleep %ums..", temp_otaa_period);
+//
+//  app.EnableGnss( false );
+//  app.EnablePeripheral( false );
+//  api.system.sleep.all(temp_otaa_period);
+//  Serial.println("Wakeup..");
+//  
 //  app.EnablePeripheral( true );
 //  app.EnableGnss( true );
 //  app.ResetGnssData();
@@ -168,13 +179,6 @@ void loop() {
 //  Serial.print("Time: "); print_date_time(app.GetGnssData().date, app.GetGnssData().time);
 //  Serial.print(" | HDOP: ");print_float(app.GetGnssData().hdop.hdop(), app.GetGnssData().hdop.isValid(), 6, 1);
 //  Serial.print(" | Satellites: "); print_int(app.GetGnssData().satellites.value(), app.GetGnssData().satellites.isValid(), 5); Serial.println();
-//
-//  Serial.printf("Try sleep %ums..", temp_otaa_period);
-//
-//  app.EnableGnss( false );
-//  app.EnablePeripheral( false );
-//  api.system.sleep.all(temp_otaa_period);
-//  Serial.println("Wakeup..");
 }
 
 void BlinkLedIndicator()
