@@ -8,7 +8,8 @@ namespace connection {
                     const uint8_t* app_key, uint8_t app_key_size,
                     RAK_LORA_BAND band,
                     uint8_t rejoin_retry,
-                    uint8_t send_request_retry ){
+                    uint8_t send_request_retry,
+                    void (*send_cb)(int32_t) ){
     if( device_eui == nullptr || device_eui_size != sizeof(this->device_eui) ||
         app_eui    == nullptr || app_eui_size    != sizeof(this->app_eui)    ||
         app_key    == nullptr || app_key_size    != sizeof(this->app_key) ){
@@ -23,12 +24,13 @@ namespace connection {
     this->rejoin_retry = rejoin_retry;
     this->send_request_retry = send_request_retry;
     this->band = band;
+    this->send_cb = send_cb;
     this->initialized = true;
   }
   bool Lorawan::IsInitialized(){
     return this->initialized;
   }
-  ReturnCode Lorawan::Connect()
+  ReturnCode Lorawan::Connect( LorawanCallback* notify_network_join_wait )
   {
     if (!api.lorawan.appeui.set(this->app_eui, 8)) {
       return ReturnCode::kInvalidAppEui;
@@ -51,12 +53,16 @@ namespace connection {
     {
       return ReturnCode::kFailJoinNetwork;
     }
-  
-    /** Wait for Join success */
-    while (api.lorawan.njs.get() == 0) {
-      Serial.println("Wait for LoRaWAN join...");
+
+    // wait for join success
+    while(api.lorawan.njs.get() == false) 
+    {
       api.lorawan.join();
       delay(10000);
+      if( notify_network_join_wait != nullptr )
+      {
+        notify_network_join_wait->NotifyNetworkJoin( api.lorawan.njs.get() );
+      }
     }
 
     // enable ADR
@@ -70,8 +76,10 @@ namespace connection {
     
     api.lorawan.registerRecvCallback(ReceiveCb);
     api.lorawan.registerJoinCallback(JoinCb);
-    api.lorawan.registerSendCallback(SendCb);
-    
+    if( this->send_cb != nullptr )
+    {
+      api.lorawan.registerSendCallback(this->send_cb); 
+    }
     return ReturnCode::kOk;
   }
 
@@ -86,7 +94,6 @@ namespace connection {
     
     // If not part of a network, do rejoin
     while (api.lorawan.njs.get() == 0) {
-      Serial.println("wait for LoRaWAN join...");
       api.lorawan.join();
       api.system.sleep.all(10000);
       if (retry-- <= 0) {
@@ -98,7 +105,7 @@ namespace connection {
       /** Send the data package */
       uint8_t try_send_request = this->send_request_retry;
       while( !api.lorawan.send(size, payload, 1) && try_send_request--) {
-       Serial.println("retry sending payload");
+//       Serial.println("retry sending payload");
        delay(1000);
       }
       
@@ -115,7 +122,7 @@ namespace connection {
   void Lorawan::ReceiveCb(SERVICE_LORA_RECEIVE_T * data)
   {
     if (data->BufferSize > 0) {
-      Serial.println("something received!");
+      Serial.println("received:");
       for (int i = 0; i < data->BufferSize; i++) {
         Serial.printf("%x", data->Buffer[i]);
       }
@@ -128,14 +135,5 @@ namespace connection {
     Serial.printf("join status: %d\r\n", status);
   }
   
-  void Lorawan::SendCb(int32_t status)
-  {
-    if (status == 0) {
-      Serial.println("successfully sent");
-    } else {
-      Serial.println("sending failed");
-    }
-  }
-
 } // namespace connection
 } // namespace teapot

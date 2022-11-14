@@ -7,6 +7,15 @@
 namespace teapot{
 namespace connection {
 
+  class LorawanCallback{
+    public:
+      virtual ~LorawanCallback() {}
+      virtual void NotifyNetworkJoin( bool joined ) = 0;
+
+    protected:
+      LorawanCallback() {}
+  };
+
   enum class ReturnCode {
     kOk = 0,
     kError,
@@ -16,6 +25,8 @@ namespace connection {
     kInvalidBand,
     kFailJoinNetwork,
     kFailSendPayload,
+    kNullpointer,
+    kTimeout,
   };
   
   class Lorawan {
@@ -35,17 +46,19 @@ namespace connection {
       
       static void ReceiveCb( SERVICE_LORA_RECEIVE_T * data );
       static void JoinCb( int32_t status );
-      static void SendCb( int32_t status );
+      void (*send_cb)(int32_t);
     public:
       Lorawan( const uint8_t* device_eui, uint8_t device_eui_size,
                const uint8_t* app_eui, uint8_t app_eui_size,
                const uint8_t* app_key,uint8_t app_key_size,
                RAK_LORA_BAND band,
                uint8_t rejoin_retry = 3,
-               uint8_t send_request_retry = 3);
-      ReturnCode Connect();      
+               uint8_t send_request_retry = 3,
+               void (*send_cb)(int32_t) = nullptr );
+      ReturnCode Connect( LorawanCallback* notify_network_join_wait );      
       ReturnCode Send(CayenneLPP& payload);
       ReturnCode Send(uint8_t* payload, size_t size);
+//      ReturnCode WaitForUplinkProcess(uint32_t timeout_ms, uint32_t ms = 100);
       bool IsInitialized();
   };
   

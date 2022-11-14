@@ -278,6 +278,33 @@ namespace bwlr3d {
   {
     return this->l86; 
   }
+
+  void Application::BlinkLedIndicator( uint32_t ms )
+  {  
+    EnableLed(Led::kGreen, true);
+    EnableLed(Led::kRed, true);
+    delay(ms);
+    EnableLed(Led::kGreen, false);
+    EnableLed(Led::kRed, false);
+  } 
+  
+  void Application::BlinkLedIndicator(Led led, uint32_t ms)
+  {  
+    EnableLed( led, true );
+    delay(ms);
+    EnableLed( led, false );
+  } 
+  
+  void Application::BlinkLedIndicator(Led led, int total_blink, uint32_t ms)
+  {
+    for( int i = 0; i < total_blink; i++ )
+    {      
+      EnableLed( led, true );
+      delay(ms);
+      EnableLed( led, false );
+      delay(ms);
+    }
+  }
   
 } // namespace bwlr3d 
 } // namespace teapot
@@ -287,7 +314,8 @@ namespace teapot{
 namespace bwlr3d {
 namespace payload {
   /* environmental payload */
-  Environmental::Environmental( float temperature,
+  Environmental::Environmental( float battery,
+                                float temperature,
                                 uint32_t pressure,
                                 float humidity,
                                 uint32_t gas_resistance,
@@ -296,6 +324,7 @@ namespace payload {
     // set data
     this->data.header.version = kVersion;
     this->data.header.type = static_cast<uint32_t>(this->type);
+    this->data.battery = battery;
     this->data.temperature = temperature;
     this->data.pressure = pressure;
     this->data.humidity = humidity;
@@ -347,7 +376,6 @@ namespace payload {
 
   /* gnss payload */
   Gnss::Gnss( 
-        const uint32_t timestamp,
         uint16_t satellite,
         float hdop,
         double latitude,
@@ -358,7 +386,6 @@ namespace payload {
     // set data
     this->data.header.version = kVersion;
     this->data.header.type = static_cast<uint32_t>(this->type);
-    this->data.timestamp = timestamp;
     this->data.satellite = satellite;
     this->data.hdop = hdop;
     this->data.latitude = latitude;

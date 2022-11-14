@@ -132,6 +132,9 @@ namespace bwlr3d {
        */
       ReturnCode    ProcessGnssStream(float hdop, uint32_t sat, unsigned long ms);
       TinyGPSPlus&  GetGnssData();
+      void          BlinkLedIndicator( uint32_t ms );
+      void          BlinkLedIndicator(Led led, uint32_t ms);
+      void          BlinkLedIndicator(Led led, int total_blink, uint32_t ms);
   };
   
 } // namespace bwlr3d 
@@ -143,7 +146,7 @@ namespace teapot{
 namespace bwlr3d {
 namespace payload {
   /* Payload Component Definition */
-  const uint32_t kVersion = 0x01;
+  const uint8_t kVersion = 0x01;
   enum class Type {
     kEnvironmental = 0x01,
     kImu = 0x02,
@@ -151,8 +154,8 @@ namespace payload {
   };
   
   struct Header {
-    uint32_t version;
-    uint32_t type;
+    uint8_t version;
+    uint8_t type;
   } __attribute__((packed));
 
   struct Trailer {
@@ -170,6 +173,7 @@ namespace payload {
   class Environmental {
     struct Frame {
       Header header;
+      float battery;
       float temperature;  // Celsius
       uint32_t pressure;  // Pascals
       float humidity; // RH %
@@ -182,6 +186,7 @@ namespace payload {
     Frame data;
     public:
       Environmental( 
+        float battery,
         float temperature,
         uint32_t pressure,
         float humidity,
@@ -211,7 +216,6 @@ namespace payload {
   class Gnss {
     struct Frame {
       Header header;
-      uint32_t timestamp;
       uint16_t satellite; 
       float hdop;
       double latitude;
@@ -223,7 +227,6 @@ namespace payload {
     Frame data;
     public:
       Gnss( 
-        const uint32_t timestamp,
         uint16_t satellite,
         float hdop,
         double latitude,
