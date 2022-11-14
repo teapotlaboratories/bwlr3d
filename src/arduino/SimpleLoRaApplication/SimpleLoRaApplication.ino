@@ -123,7 +123,54 @@ void setup(void) {
   app.ResetGnssData();
 }
 
-void loop() {  
+//void loop() 
+//{
+//  uint32_t temp_period = 10 * 1000;
+//  teapot::bwlr3d::SensorData  data;
+//  float battery;
+//  teapot::bwlr3d::ReturnCode gnss_ret = teapot::bwlr3d::ReturnCode::kError;
+//  
+//  Serial.println("power-on peripheral");
+//  // power-on peripheral
+//  app.EnablePeripheral( true );
+//  app.EnableGnss( false );
+//  app.ResetGnssData();
+//  
+//  /* read sensor and gnss data */
+//  {    
+//    /* read sensor data */
+//    delay( 100 );
+//    if( app.ConfigureSensor() != teapot::bwlr3d::ReturnCode::kOk )
+//    {
+//      Serial.println("failed to configure sensor");
+//      return;
+//    }
+//    delay( 100 );
+//    if( app.GetSensorData(data) != teapot::bwlr3d::ReturnCode::kOk )
+//    {
+//      Serial.println("failed to read sensor data");
+//      return; 
+//    }
+//    battery = app.ReadBatteryVoltage();
+////    
+////    /* read gnss data */
+////    // process gnss stream
+////    gnss_ret = app.ProcessGnssStream(5, 1, 30*1000);
+////    Serial.printf("process gnss stream done. err: %d\r\n", gnss_ret);
+//  }
+//  
+//  /* power-off all sensor */
+//  app.EnableGnss( false );
+//  app.EnablePeripheral( false );
+//
+//  /* sleep device */
+//  Serial.printf("Try sleep %ums..\r\n", temp_period);
+//  api.system.sleep.all(temp_period);
+//  Serial.println("Wakeup..");
+//}
+
+void loop() 
+{  
   /* prepare packet */
   uint8_t payload[128];
   size_t  out_payload_size = 0;  
@@ -292,12 +339,19 @@ void loop() {
   Serial.printf("Try sleep %ums..\r\n", kOtaaPeriodMs);
   api.system.sleep.all(kOtaaPeriodMs);
   Serial.println("Wakeup..");
+  
+  // update gnss_process_timer
+  gnss_process_timer_s += abs( (millis()/1000) - (start/1000) );
 
   /* power-on all sensor */
   app.EnablePeripheral( true );
-  app.EnableGnss( true );
-  app.ResetGnssData();
-
-  // update gnss_process_timer
-  gnss_process_timer_s += abs( (millis()/1000) - (start/1000) );
+  if( gnss_process_timer_s >= kGnssPeriodS )
+  { 
+    app.EnableGnss( true );
+    app.ResetGnssData();
+  }
+  else 
+  {
+    app.EnableGnss( false );
+  }
 }
