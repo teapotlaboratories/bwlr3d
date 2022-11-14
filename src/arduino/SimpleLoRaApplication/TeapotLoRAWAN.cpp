@@ -69,13 +69,11 @@ namespace connection {
     api.lorawan.adr.set(true);
     
     // enable send retry
-    api.lorawan.rety.set(2);
+    api.lorawan.rety.set(3);
 
     // enable send confirmation
     api.lorawan.cfm.set(1);
     
-    api.lorawan.registerRecvCallback(ReceiveCb);
-    api.lorawan.registerJoinCallback(JoinCb);
     if( this->send_cb != nullptr )
     {
       api.lorawan.registerSendCallback(this->send_cb); 
@@ -117,22 +115,6 @@ namespace connection {
     }
     
     return ReturnCode::kFailJoinNetwork;
-  }
-  
-  void Lorawan::ReceiveCb(SERVICE_LORA_RECEIVE_T * data)
-  {
-    if (data->BufferSize > 0) {
-      Serial.println("received:");
-      for (int i = 0; i < data->BufferSize; i++) {
-        Serial.printf("%x", data->Buffer[i]);
-      }
-      Serial.print("\r\n");
-    }
-  }
-  
-  void Lorawan::JoinCb(int32_t status)
-  {
-    Serial.printf("join status: %d\r\n", status);
   }
   
 } // namespace connection

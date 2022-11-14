@@ -1,8 +1,7 @@
 #include "TeapotBWLR3D.h"
 #include "TeapotLoRaWAN.h"
 
-// if COMBINED_LORA_PAYLOAD defined, 
-// data will be sent as 1 payload.
+// if COMBINED_LORA_PAYLOAD defined, data will be sent as 1 payload.
 #define COMBINED_LORA_PAYLOAD
 
 /* forward-declaration */
@@ -16,72 +15,72 @@ const RAK_LORA_BAND kOtaaBand = RAK_REGION_US915;
 //const uint32_t kOtaaPeriodMs      = (10 * 60 *1000); // 10 minute 
 //const uint32_t kOtaaPeriodMs      = (10 * 1000); // 10 seconds
 //const uint32_t kOtaaPeriodMs      = (30 * 1000); // 30 seconds
-const uint32_t kOtaaPeriodMs      = (300 * 1000); // 5 minute
+const uint32_t kOtaaPeriodMs      = (120 * 1000); // 5 minute
 //const uint32_t kGnssPeriodS      = ( 24 * 3600 ); // 24 hour
 //const uint32_t kGnssPeriodS      = ( 15 * 60 ); // 15 minute
-const uint32_t kGnssPeriodS      = ( 5 * 60 ); // 15 minute
+const uint32_t kGnssPeriodS      = ( 4 * 60 ); // 15 minute
 
 /* main application objects */
 teapot::connection::Lorawan lora( kOtaaDevEui, sizeof(kOtaaDevEui),
                                   kOtaaAppEui, sizeof(kOtaaAppEui),
                                   kOtaaAppKey, sizeof(kOtaaAppKey),
-                                  kOtaaBand,3, 3, nullptr );
+                                  kOtaaBand,3, 5, SendCb );
 teapot::bwlr3d::Application app;
 uint32_t                    gnss_process_timer_s = 0; // timer for getting and sending gnss data
 bool                        first_fix = false;
-//
-///* manage uplink process */
-//int32_t   send_status;
-//bool      send_done;
-//
-//void ResetSendWait()
-//{
-//  send_done = false;
-//}
-//
-///** Upstream Transmit Callback
-// *
-// * A callback once an uplink process is done
-// *
-// * @param status status of the uplink process.
-// */
-//void SendCb( int32_t status )
-//{
-//  send_status = status;
-//  send_done = true;
-//}
-//
-///** Busy wait with timeout for Uplink process
-// *
-// * Callback once an uplink process is done
-// *
-// * @param timeout_ms timeout of the busy wait
-// * @param ms delay for the busy wait loop
-// * @return `kOk` if send is successful, `kTimeout` if timeout, 
-// *         `kFailSendPayload` if fail to send
-// * 
-// */
-//teapot::connection::ReturnCode WaitForUplinkProcess(uint32_t timeout_ms, uint32_t ms = 100)
-//{
-//  uint32_t start = millis();
-//  bool is_timeout = false;
-//  while( !(send_done) && !is_timeout )
-//  {
-//    delay(ms);
-//    is_timeout = timeout_ms < (millis()-start);
-//  }
-//
-//  if( send_status )
-//  {
-//    return teapot::connection::ReturnCode::kOk;      
-//  }
-//  else if( is_timeout )
-//  {
-//    return teapot::connection::ReturnCode::kTimeout;
-//  }
-//
-//  return teapot::connection::ReturnCode::kFailSendPayload;
-//}
+
+/* manage uplink process */
+int32_t   send_status;
+bool      send_done;
+
+void ResetSendWait()
+{
+  send_done = false;
+}
+
+/** Upstream Transmit Callback
+ *
+ * A callback once an uplink process is done
+ *
+ * @param status status of the uplink process.
+ */
+void SendCb( int32_t status )
+{
+  send_status = status;
+  send_done = true;
+}
+
+/** Busy wait with timeout for Uplink process
+ *
+ * Callback once an uplink process is done
+ *
+ * @param timeout_ms timeout of the busy wait
+ * @param ms delay for the busy wait loop
+ * @return `kOk` if send is successful, `kTimeout` if timeout, 
+ *         `kFailSendPayload` if fail to send
+ * 
+ */
+teapot::connection::ReturnCode WaitForUplinkProcess(uint32_t timeout_ms, uint32_t ms = 100)
+{
+  uint32_t start = millis();
+  bool is_timeout = false;
+  while( !(send_done) && !is_timeout )
+  {
+    delay(ms);
+    is_timeout = timeout_ms < (millis()-start);
+  }
+
+  if( send_status )
+  {
+    return teapot::connection::ReturnCode::kOk;      
+  }
+  else if( is_timeout )
+  {
+    return teapot::connection::ReturnCode::kTimeout;
+  }
+
+  return teapot::connection::ReturnCode::kFailSendPayload;
+}
 
 void setup(void) {
   api.system.restoreDefault();  
@@ -94,7 +93,6 @@ void setup(void) {
   
   // connect to LoRaWAN network
   if( !lora.IsInitialized() ){
-//    Serial.println("fail to initialize LoRaWAN connection");
     while(true) {
       app.BlinkLedIndicator( teapot::bwlr3d::Led::kRed, 4, 200 );   
       delay( 5000 );
@@ -113,7 +111,6 @@ void setup(void) {
   NotifyLorawanNetworkJoin notify_join;
   teapot::connection::ReturnCode ret = lora.Connect( &notify_join );
   if( ret != teapot::connection::ReturnCode::kOk ){
-//    Serial.printf("fail to connect to LoRaWAN gateway. Ret: %d\r\n", ret);
     while(true) {
       app.BlinkLedIndicator( teapot::bwlr3d::Led::kRed, 5, 200 );   
       delay( 5000 );
@@ -157,20 +154,20 @@ void loop() {
 
     // force to send gnss data on next loop
     gnss_process_timer_s = kGnssPeriodS;
-        
+    
     return;
   }
 
   /* read sensor and gnss data */
   {    
     /* read sensor data */
-    delay( 500 );
+    delay( 100 );
     if( app.ConfigureSensor() != teapot::bwlr3d::ReturnCode::kOk )
     {
       Serial.println("failed to configure sensor");
       return;
     }
-    delay( 500 );
+    delay( 100 );
     if( app.GetSensorData(data) != teapot::bwlr3d::ReturnCode::kOk )
     {
       Serial.println("failed to read sensor data");
@@ -238,17 +235,16 @@ void loop() {
 
   /* send payload and wait for process to complete */
   Serial.printf("sending environmental, imu, and gnss data. size: %d\r\n", out_payload_size);
-//  ResetSendWait();
+  ResetSendWait();
   lora.Send(payload, out_payload_size);
-//  teapot::connection::ReturnCode wait_ret = WaitForUplinkProcess(60 * 1000);
-//  Serial.printf("uplink status: %d\r\n", wait_ret);
-//  delay(5000);
-  
+  teapot::connection::ReturnCode wait_ret = WaitForUplinkProcess(60 * 1000);
+  Serial.printf("uplink status: %d\r\n", wait_ret);
 #else
   /* send environmental packet */
   Serial.println("sending environmental data");
   ResetSendWait();
-  teapot::bwlr3d::payload::Environmental env( data.temperature, 
+  teapot::bwlr3d::payload::Environmental env( battery,
+                                              data.temperature, 
                                               data.pressure, 
                                               data.humidity, 
                                               data.gas_resistance, 
