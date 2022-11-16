@@ -1,5 +1,6 @@
 #include "TeapotBWLR3D.h"
-#include <CRC32.h>
+#include <CRC.h>
+#include <CRC16.h>
 
 /* application implementation */
 namespace teapot {
@@ -179,11 +180,11 @@ namespace bwlr3d {
   void Application::SetupBme68x()
   {  
     // Set up oversampling and filter initialization
-    this->bme68x.setTemperatureOversampling(BME680_OS_8X);
-    this->bme68x.setHumidityOversampling(BME680_OS_2X);
-    this->bme68x.setPressureOversampling(BME680_OS_4X);
-    this->bme68x.setIIRFilterSize(BME680_FILTER_SIZE_3);
-    this->bme68x.setGasHeater(320, 150); // 320*C for 150 ms
+    this->bme68x.setOversampling(TemperatureSensor, Oversample16);  // Use enumerated type values
+    this->bme68x.setOversampling(HumiditySensor, Oversample16);     // Use enumerated type values
+    this->bme68x.setOversampling(PressureSensor, Oversample16);     // Use enumerated type values
+    this->bme68x.setIIRFilter(IIR4);  // Use enumerated type values
+    this->bme68x.setGas(320, 150);  // 320c for 150 milliseconds
   }
  
   ReturnCode Application::ConfigureSensor()
@@ -202,7 +203,7 @@ namespace bwlr3d {
     SetupLsm6dsox();
   
     /* configure BME68x */
-    if (!this->bme68x.begin()) {
+    if ( !(this->bme68x.begin()) ) {
       return ReturnCode::kBme68xNotFound;
     }
     SetupBme68x();
@@ -243,13 +244,18 @@ namespace bwlr3d {
     /* Read BME68x sensor */
     if( sensor & Sensor::kBme68x )
     {
-      if ( !this->bme68x.performReading()) {
-        return ReturnCode::kBme68xReadFail;
+      int32_t temp = 0, humidity = 0, pressure = 0, gas = 0;
+      
+      // TODO: improve BME68x reading. Currently first read always fails.;
+      for( int i = 0; i < 2; i++)
+      {
+        this->bme68x.getSensorData(temp, humidity, pressure, gas, true);
       }
-      data.temperature      = bme68x.temperature;
-      data.pressure         = bme68x.pressure;
-      data.humidity         = bme68x.humidity;
-      data.gas_resistance   = bme68x.gas_resistance;  
+      
+      data.temperature      = static_cast<float>(temp) / 100;
+      data.pressure         = static_cast<float>(pressure) / 100;
+      data.humidity         = static_cast<float>(humidity) / 1000;
+      data.gas_resistance   = static_cast<float>(gas) / 100;  
     }
     return ReturnCode::kOk;
   }
@@ -313,12 +319,12 @@ namespace bwlr3d {
 namespace teapot{
 namespace bwlr3d {
 namespace payload {
-  /* environmental payload */
+  /* environmental payload implementation*/
   Environmental::Environmental( float battery,
                                 float temperature,
-                                uint32_t pressure,
+                                float pressure,
                                 float humidity,
-                                uint32_t gas_resistance,
+                                float gas_resistance,
                                 float lux )
   {
     // set data
@@ -331,10 +337,10 @@ namespace payload {
     this->data.gas_resistance = gas_resistance;
     this->data.lux = lux;
 
-    // calculate CRC32
+    // calculate CRC16
     size_t frame_size = sizeof(this->data);
-    size_t payload_wo_crc32_size = frame_size - sizeof(this->data.trailer.checksum);
-    this->data.trailer.checksum = CRC32::calculate(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc32_size);    
+    size_t payload_wo_crc16_size = frame_size - sizeof(this->data.trailer.checksum);
+    this->data.trailer.checksum = crc16(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc16_size, 0x1021, 0, 0, false, false);  
   }
   
   size_t Environmental::GetAsBytes(uint8_t* data, size_t size)
@@ -348,6 +354,7 @@ namespace payload {
     return( sizeof(this->data) );
   }
 
+  /* imu payload implementation */
   Imu::Imu( const Vector& mag, const Vector& accel, const Vector& gyro  )
   {
     // set data
@@ -357,10 +364,10 @@ namespace payload {
     this->data.acceleration = accel;
     this->data.gyro = gyro;
 
-    // calculate CRC32
+    // calculate CRC16
     size_t frame_size = sizeof(this->data);
-    size_t payload_wo_crc32_size = frame_size - sizeof(this->data.trailer.checksum);
-    this->data.trailer.checksum = CRC32::calculate(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc32_size);    
+    size_t payload_wo_crc16_size = frame_size - sizeof(this->data.trailer.checksum);
+    this->data.trailer.checksum = crc16(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc16_size, 0x1021, 0, 0, false, false);
   }
   
   size_t Imu::GetAsBytes(uint8_t* data, size_t size)
@@ -374,7 +381,7 @@ namespace payload {
     return( sizeof(this->data) );
   }
 
-  /* gnss payload */
+  /* gnss payload implementation */
   Gnss::Gnss( 
         uint16_t satellite,
         float hdop,
@@ -392,10 +399,10 @@ namespace payload {
     this->data.longitude = longitude;
     this->data.altitude = altitude;
 
-    // calculate CRC32
+    // calculate CRC16
     size_t frame_size = sizeof(this->data);
-    size_t payload_wo_crc32_size = frame_size - sizeof(this->data.trailer.checksum);
-    this->data.trailer.checksum = CRC32::calculate(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc32_size);    
+    size_t payload_wo_crc16_size = frame_size - sizeof(this->data.trailer.checksum);
+    this->data.trailer.checksum = crc16(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc16_size, 0x1021, 0, 0, false, false);  
   }
   
   size_t Gnss::GetAsBytes(uint8_t* data, size_t size)

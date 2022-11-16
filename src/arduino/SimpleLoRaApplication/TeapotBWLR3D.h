@@ -4,7 +4,7 @@
 #include "Arduino.h"
 #include "Adafruit_LIS3MDL.h"
 #include "Adafruit_LSM6DSOX.h"
-#include "Adafruit_BME680.h"
+#include "Zanshin_BME680.h"
 #include "Adafruit_VEML7700.h"
 #include "TinyGPSPlus.h"
 
@@ -76,11 +76,11 @@ namespace bwlr3d {
     // Temperature (Celsius)
     float temperature;
     // Pressure (Pascals)
-    uint32_t pressure;
+    float pressure;
     // Humidity (RH %)
     float humidity;
-    // Gas resistor (ohms)
-    uint32_t gas_resistance;
+    // Gas resistor (milli-ohms)
+    float gas_resistance;
     // Lux
     float lux;
     // Magnetic (uT)
@@ -95,7 +95,7 @@ namespace bwlr3d {
     private:
       Adafruit_LSM6DSOX lsm6dsox;
       Adafruit_LIS3MDL  lis3mdl;
-      Adafruit_BME680   bme68x;
+      BME680_Class      bme68x;
       Adafruit_VEML7700 veml7700;
       TinyGPSPlus       l86;
       bool              enable_peripheral;
@@ -159,7 +159,7 @@ namespace payload {
   } __attribute__((packed));
 
   struct Trailer {
-    uint32_t checksum; // CRC32
+    uint16_t checksum; // CRC16
   } __attribute__((packed));
     
   struct Vector {
@@ -175,9 +175,9 @@ namespace payload {
       Header header;
       float battery;
       float temperature;  // Celsius
-      uint32_t pressure;  // Pascals
+      float pressure;  // Pascals
       float humidity; // RH %
-      uint32_t gas_resistance;  //  ohms
+      float gas_resistance;  //  milli-ohms
       float lux;  /// lux
       Trailer trailer;
     } __attribute__((packed));
@@ -188,9 +188,9 @@ namespace payload {
       Environmental( 
         float battery,
         float temperature,
-        uint32_t pressure,
+        float pressure,
         float humidity,
-        uint32_t gas_resistance,
+        float gas_resistance,
         float lux 
       );
       size_t GetAsBytes(uint8_t* data, size_t size);

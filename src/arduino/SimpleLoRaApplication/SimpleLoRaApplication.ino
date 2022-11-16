@@ -2,7 +2,7 @@
 #include "TeapotLoRaWAN.h"
 
 // if COMBINED_LORA_PAYLOAD defined, data will be sent as 1 payload.
-#define COMBINED_LORA_PAYLOAD
+//#define COMBINED_LORA_PAYLOAD
 
 /* forward-declaration */
 void SendCb( int32_t status );
@@ -15,10 +15,10 @@ const RAK_LORA_BAND kOtaaBand = RAK_REGION_US915;
 //const uint32_t kOtaaPeriodMs      = (10 * 60 *1000); // 10 minute 
 //const uint32_t kOtaaPeriodMs      = (10 * 1000); // 10 seconds
 //const uint32_t kOtaaPeriodMs      = (30 * 1000); // 30 seconds
-const uint32_t kOtaaPeriodMs      = (120 * 1000); // 5 minute
+const uint32_t kOtaaPeriodMs      = (120 * 1000); // 2 minute
 //const uint32_t kGnssPeriodS      = ( 24 * 3600 ); // 24 hour
 //const uint32_t kGnssPeriodS      = ( 15 * 60 ); // 15 minute
-const uint32_t kGnssPeriodS      = ( 4 * 60 ); // 15 minute
+const uint32_t kGnssPeriodS      = ( 4 * 60 ); // 4 minute
 
 /* main application objects */
 teapot::connection::Lorawan lora( kOtaaDevEui, sizeof(kOtaaDevEui),
@@ -70,7 +70,7 @@ teapot::connection::ReturnCode WaitForUplinkProcess(uint32_t timeout_ms, uint32_
     is_timeout = timeout_ms < (millis()-start);
   }
 
-  if( send_status )
+  if( send_status == 0 )
   {
     return teapot::connection::ReturnCode::kOk;      
   }
@@ -94,11 +94,11 @@ void setup(void) {
   // connect to LoRaWAN network
   if( !lora.IsInitialized() ){
     while(true) {
+//      Serial.println("fail to initialize connection");
       app.BlinkLedIndicator( teapot::bwlr3d::Led::kRed, 4, 200 );   
       delay( 5000 );
     }
   }
-
   
   class NotifyLorawanNetworkJoin : public teapot::connection::LorawanCallback {
     public:
@@ -109,9 +109,10 @@ void setup(void) {
       }
   };
   NotifyLorawanNetworkJoin notify_join;
-  teapot::connection::ReturnCode ret = lora.Connect( &notify_join );
+  teapot::connection::ReturnCode ret = lora.Connect( notify_join );
   if( ret != teapot::connection::ReturnCode::kOk ){
     while(true) {
+//      Serial.printf("fail to connect to gateway. ret: %d\r\n", ret);
       app.BlinkLedIndicator( teapot::bwlr3d::Led::kRed, 5, 200 );   
       delay( 5000 );
     }
@@ -122,52 +123,6 @@ void setup(void) {
   app.EnableGnss( true );
   app.ResetGnssData();
 }
-
-//void loop() 
-//{
-//  uint32_t temp_period = 10 * 1000;
-//  teapot::bwlr3d::SensorData  data;
-//  float battery;
-//  teapot::bwlr3d::ReturnCode gnss_ret = teapot::bwlr3d::ReturnCode::kError;
-//  
-//  Serial.println("power-on peripheral");
-//  // power-on peripheral
-//  app.EnablePeripheral( true );
-//  app.EnableGnss( false );
-//  app.ResetGnssData();
-//  
-//  /* read sensor and gnss data */
-//  {    
-//    /* read sensor data */
-//    delay( 100 );
-//    if( app.ConfigureSensor() != teapot::bwlr3d::ReturnCode::kOk )
-//    {
-//      Serial.println("failed to configure sensor");
-//      return;
-//    }
-//    delay( 100 );
-//    if( app.GetSensorData(data) != teapot::bwlr3d::ReturnCode::kOk )
-//    {
-//      Serial.println("failed to read sensor data");
-//      return; 
-//    }
-//    battery = app.ReadBatteryVoltage();
-////    
-////    /* read gnss data */
-////    // process gnss stream
-////    gnss_ret = app.ProcessGnssStream(5, 1, 30*1000);
-////    Serial.printf("process gnss stream done. err: %d\r\n", gnss_ret);
-//  }
-//  
-//  /* power-off all sensor */
-//  app.EnableGnss( false );
-//  app.EnablePeripheral( false );
-//
-//  /* sleep device */
-//  Serial.printf("Try sleep %ums..\r\n", temp_period);
-//  api.system.sleep.all(temp_period);
-//  Serial.println("Wakeup..");
-//}
 
 void loop() 
 {  
@@ -193,6 +148,12 @@ void loop()
         first_fix = true;
     }
     Serial.printf("process gnss stream done. err: %d\r\n", ret);
+//    Serial.printf("time to fix: %d ms\n",millis() - start);
+//    Serial.printf("hdop: %f, sat: %d, lat: %f, long: %f\r\n", 
+//                  app.GetGnssData().hdop.hdop(), 
+//                  app.GetGnssData().satellites.value(),
+//                  app.GetGnssData().location.lat(),
+//                  app.GetGnssData().location.lng());
     
     /* blink to indicate success or fail of first fix */
     // blink 3 times with 500ms delay
@@ -208,19 +169,36 @@ void loop()
   /* read sensor and gnss data */
   {    
     /* read sensor data */
-    delay( 100 );
+    delay( 50 );
     if( app.ConfigureSensor() != teapot::bwlr3d::ReturnCode::kOk )
     {
       Serial.println("failed to configure sensor");
       return;
     }
-    delay( 100 );
     if( app.GetSensorData(data) != teapot::bwlr3d::ReturnCode::kOk )
     {
       Serial.println("failed to read sensor data");
       return; 
     }
     battery = app.ReadBatteryVoltage();
+//    Serial.printf("batt: %f\r\n", battery);
+//    Serial.printf("temp: %f c, humidity: %f %%, pressure: %f Pa, gas: %f mOhm\r\n", 
+//                  data.temperature,
+//                  data.humidity,
+//                  data.pressure,
+//                  data.gas_resistance );
+//    Serial.printf("mag - x: %f, y: %f, z: %f uT\r\n",
+//                  data.mag.magnetic.x, 
+//                  data.mag.magnetic.y, 
+//                  data.mag.magnetic.z ); 
+//    Serial.printf("accel - x: %f, y: %f, z: %f m/s^2\r\n",
+//                  data.accel.acceleration.x, 
+//                  data.accel.acceleration.y, 
+//                  data.accel.acceleration.z ); 
+//    Serial.printf("gyro - x: %f, y: %f, z: %f rad/s\r\n",
+//                  data.gyro.gyro.x, 
+//                  data.gyro.gyro.y, 
+//                  data.gyro.gyro.z );
     
     /* read gnss data */
     // simple inaccurate timer for processing gnss data
@@ -232,6 +210,12 @@ void loop()
       // process gnss stream
       gnss_ret = app.ProcessGnssStream(5, 1, 30*1000);
       Serial.printf("process gnss stream done. err: %d\r\n", gnss_ret);
+//      Serial.printf("time to fix: %d ms\n",millis() - start);
+//      Serial.printf("hdop: %f, sat: %d, lat: %f, long: %f\r\n", 
+//                    app.GetGnssData().hdop.hdop(), 
+//                    app.GetGnssData().satellites.value(),
+//                    app.GetGnssData().location.lat(),
+//                    app.GetGnssData().location.lng());
     }
   }
   
@@ -242,27 +226,31 @@ void loop()
 #ifdef COMBINED_LORA_PAYLOAD
   uint32_t payload_total_size = 0;
   /* copy environmental packet */
-  teapot::bwlr3d::payload::Environmental env( battery,
-                                              data.temperature, 
-                                              data.pressure, 
-                                              data.humidity, 
-                                              data.gas_resistance, 
-                                              data.lux );
-  out_payload_size = env.GetAsBytes(payload, sizeof(payload));
-  payload_total_size += out_payload_size;
+  {
+    teapot::bwlr3d::payload::Environmental env( battery,
+                                                data.temperature, 
+                                                data.pressure, 
+                                                data.humidity, 
+                                                data.gas_resistance, 
+                                                data.lux );
+    out_payload_size = env.GetAsBytes(payload, sizeof(payload));
+    payload_total_size += out_payload_size;
+  }
 
   /* copy imu packet */
-  teapot::bwlr3d::payload::Imu imu( { data.mag.magnetic.x, 
-                                      data.mag.magnetic.y, 
-                                      data.mag.magnetic.z }, 
-                                    { data.accel.acceleration.x, 
-                                      data.accel.acceleration.y, 
-                                      data.accel.acceleration.z }, 
-                                    { data.gyro.gyro.x, 
-                                      data.gyro.gyro.y, 
-                                      data.gyro.gyro.z } );
-  out_payload_size = env.GetAsBytes(payload + payload_total_size, sizeof(payload) - payload_total_size);
-  payload_total_size += out_payload_size;
+  {
+    teapot::bwlr3d::payload::Imu imu( { data.mag.magnetic.x, 
+                                        data.mag.magnetic.y, 
+                                        data.mag.magnetic.z }, 
+                                      { data.accel.acceleration.x, 
+                                        data.accel.acceleration.y, 
+                                        data.accel.acceleration.z }, 
+                                      { data.gyro.gyro.x, 
+                                        data.gyro.gyro.y, 
+                                        data.gyro.gyro.z } );
+    out_payload_size = imu.GetAsBytes(payload + payload_total_size, sizeof(payload) - payload_total_size);
+    payload_total_size += out_payload_size;
+  }
 
   /* send gnss packet */
   if( gnss_ret == teapot::bwlr3d::ReturnCode::kOk )
@@ -287,34 +275,41 @@ void loop()
   teapot::connection::ReturnCode wait_ret = WaitForUplinkProcess(60 * 1000);
   Serial.printf("uplink status: %d\r\n", wait_ret);
 #else
-  /* send environmental packet */
-  Serial.println("sending environmental data");
-  ResetSendWait();
-  teapot::bwlr3d::payload::Environmental env( battery,
-                                              data.temperature, 
-                                              data.pressure, 
-                                              data.humidity, 
-                                              data.gas_resistance, 
-                                              data.lux );
-  out_payload_size = env.GetAsBytes(payload, sizeof(payload));
-  lora.Send(payload, out_payload_size);
-  WaitForUplinkProcess(60 * 1000);
-
-  /* send imu packet */
-  Serial.println("sending imu data");
-  ResetSendWait();
-  teapot::bwlr3d::payload::Imu imu( { data.mag.magnetic.x, 
-                                      data.mag.magnetic.y, 
-                                      data.mag.magnetic.z }, 
-                                    { data.accel.acceleration.x, 
-                                      data.accel.acceleration.y, 
-                                      data.accel.acceleration.z }, 
-                                    { data.gyro.gyro.x, 
-                                      data.gyro.gyro.y, 
-                                      data.gyro.gyro.z } );
-  out_payload_size = env.GetAsBytes(payload, sizeof(payload));
-  lora.Send(payload, out_payload_size); 
-  WaitForUplinkProcess(60 * 1000);
+  {
+    /* send environmental packet */
+    Serial.println("sending environmental data");
+    ResetSendWait();
+    teapot::bwlr3d::payload::Environmental env( battery,
+                                                data.temperature, 
+                                                data.pressure, 
+                                                data.humidity, 
+                                                data.gas_resistance, 
+                                                data.lux );
+    out_payload_size = env.GetAsBytes(payload, sizeof(payload));
+    Serial.printf("sending payload size: %d\r\n", out_payload_size);
+    lora.Send(payload, out_payload_size);
+    teapot::connection::ReturnCode wait_ret = WaitForUplinkProcess(60 * 1000);
+    Serial.printf("uplink status: %d\r\n", wait_ret);
+  }
+  {
+    /* send imu packet */
+    Serial.println("sending imu data");
+    ResetSendWait();
+    teapot::bwlr3d::payload::Imu imu( { data.mag.magnetic.x, 
+                                        data.mag.magnetic.y, 
+                                        data.mag.magnetic.z }, 
+                                      { data.accel.acceleration.x, 
+                                        data.accel.acceleration.y, 
+                                        data.accel.acceleration.z }, 
+                                      { data.gyro.gyro.x, 
+                                        data.gyro.gyro.y, 
+                                        data.gyro.gyro.z } );
+    out_payload_size = imu.GetAsBytes(payload, sizeof(payload));
+    Serial.printf("sending payload size: %d\r\n", out_payload_size);
+    lora.Send(payload, out_payload_size); 
+    teapot::connection::ReturnCode wait_ret = WaitForUplinkProcess(60 * 1000);
+    Serial.printf("uplink status: %d\r\n", wait_ret); 
+  }
 
   /* send gnss packet */
   if( gnss_ret == teapot::bwlr3d::ReturnCode::kOk )
@@ -327,8 +322,10 @@ void loop()
                                         app.GetGnssData().location.lng(),
                                         app.GetGnssData().altitude.meters() );
     out_payload_size = gnss.GetAsBytes(payload, sizeof(payload));
+    Serial.printf("sending payload size: %d\r\n", out_payload_size);
     lora.Send(payload, out_payload_size);
-    WaitForUplinkProcess(60 * 1000);
+    teapot::connection::ReturnCode wait_ret = WaitForUplinkProcess(60 * 1000);
+    Serial.printf("uplink status: %d\r\n", wait_ret); 
 
     // reset value
     gnss_ret = teapot::bwlr3d::ReturnCode::kError;
@@ -345,6 +342,7 @@ void loop()
 
   /* power-on all sensor */
   app.EnablePeripheral( true );
+  // power-on gnss only when needed
   if( gnss_process_timer_s >= kGnssPeriodS )
   { 
     app.EnableGnss( true );

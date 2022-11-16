@@ -162,7 +162,7 @@ void loop()
   Serial.print(millis());
   Serial.println(" ms");
   Serial.println("(Wait 600 seconds or Press any key to wakeup)");
-  api.system.sleep.all(600000);
+  api.system.sleep.all(900000);
   Serial.print("The timestamp after sleeping: ");
   Serial.print(millis());
   Serial.println(" ms");

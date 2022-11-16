@@ -3,17 +3,6 @@
 teapot::bwlr3d::Application app;
 teapot::bwlr3d::SensorData data;
 
-void BlinkLedIndicator()
-{  
-  /* blink led indicator at start-up */
-  app.EnableLed(teapot::bwlr3d::Led::kGreen, true);
-  delay(500);
-  app.EnableLed(teapot::bwlr3d::Led::kGreen, false);
-  app.EnableLed(teapot::bwlr3d::Led::kRed, true);
-  delay(500);
-  app.EnableLed(teapot::bwlr3d::Led::kRed, false);
-} 
-  
 void setup(void) {
   api.system.restoreDefault();  
   Serial.begin(115200);
@@ -21,17 +10,17 @@ void setup(void) {
   app.Initialize();
   
   // blink led to indicate start-up
-  BlinkLedIndicator();
+  app.BlinkLedIndicator( 500 );
   
   // power-on peripheral
   app.EnablePeripheral( true );
-  app.EnableGnss( true );
-  app.ResetGnssData();
-  delay( 100 ); // wait some time for sensor to boot
+//  app.EnableGnss( true );
+//  app.ResetGnssData();
+  delay( 1000 ); // wait some time for sensor to boot
   teapot::bwlr3d::ReturnCode ret = app.ConfigureSensor();
   if( ret != teapot::bwlr3d::ReturnCode::kOk )
   {
-    Serial.printf("failed to configure sensor. ret: %d\n", ret);
+    Serial.printf("failed to configure sensor. ret: %d\r\n", ret);
     while( true ) delay( 1000 );
   }
   
@@ -39,19 +28,23 @@ void setup(void) {
 }
 
 void loop() {
-  if( app.GetSensorData(data) == teapot::bwlr3d::ReturnCode::kOk )
+  teapot::bwlr3d::ReturnCode ret = app.GetSensorData(data);
+  if( ret == teapot::bwlr3d::ReturnCode::kOk )
   {
     PrintSensorData();
     Serial.printf("\n\n\n\n\n");
   }
   else
   {
-    Serial.println("failed to read sensor data");
+    Serial.printf("failed to read sensor data. err: %d\r\n", ret);
   }
   delay( 500 );
 }
 
 void PrintSensorData(){
+  Serial.println("================ Battery Voltage ================");
+  Serial.print("batt: "); Serial.println(app.ReadBatteryVoltage());
+  
   Serial.println("================ VEML7700 Sensor ================");
   Serial.print("lux: "); Serial.println(data.lux);
 
@@ -88,7 +81,7 @@ void PrintSensorData(){
 
   Serial.print("Pressure = ");
   Serial.print(data.pressure / 100.0);
-  Serial.println(" hPa");
+  Serial.println(" Pa");
 
   Serial.print("Humidity = ");
   Serial.print(data.humidity);
@@ -96,5 +89,5 @@ void PrintSensorData(){
 
   Serial.print("Gas = ");
   Serial.print(data.gas_resistance / 1000.0);
-  Serial.println(" KOhms");
+  Serial.println(" mOhms");
 }
