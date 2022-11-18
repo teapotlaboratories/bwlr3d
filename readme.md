@@ -40,7 +40,7 @@ Teapot BWLR3D is part of  [Teapot open-hardware project](https://github.com/teap
 
 Schematic revisions:
 -   Revision 1: Initial design
--   Revision 2: Swap BATT_MEAS and IMU_INT pin. 
+-   Revision 2: Swap BATT_MEAS and IMU_INT pin, and add 0.1uF to voltage divider 
 
 ## Boards
  <p align="center">  <img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/images/pcb_render.gif" alt="pcb_render"  width="50%" height="50%"/><br><b>PCB Render</b></p>
