@@ -1,7 +1,10 @@
+
 # Teapot BWLR3D
  <p align="center"> <img src="https://raw.githubusercontent.com/teapotlaboratories/bwlr3d/main/docs/images/device.jpg" alt="drawing"  width="50%" height="50%"/></p>
  
-Teapot BWLR3D is an Asset Tracker and Environmental Sensor with Solar Energy Harvesting. The device is capable of sensing temperature, humidity, air pressure, air quality, light intensity using the on-board **BME688** plus **VEM7700**, and calculate device's AHRS using the **LSM6DSOX** as accelerometer and gyrometer with **LIS3MDL** as magnetometer. Equiped with low-power **L86-M33** GNSS module, the device is capable to locate itself anywhere in the world.
+Teapot BWLR3D is an Asset Tracker and Environmental Sensor with Solar Energy Harvesting. 
+The device is capable of sensing temperature, humidity, air pressure, air quality, light intensity using the on-board **BME688** plus **VEM7700**, and calculate device's AHRS using the **LSM6DSOX** as accelerometer and gyrometer with **LIS3MDL** as magnetometer. 
+Equiped with low-power **L86-M33** GNSS module, the device is capable to locate itself anywhere in the world.
 With **STM32WLE** MCU as it's core and **AEM10941** for solar charging, the device is capable ultra-low power operation with the possibility of indefinite battery-life by utilizing the solar charging capability.
 
 Teapot BWLR3D is part of  [Teapot open-hardware project](https://github.com/teapotlaboratories). 
