@@ -77,8 +77,8 @@ The following are the summary of the measurement:
 - GNSS Fix - Cold Start: 15s @ 38mA
 - GNSS Fix - Hot Start: 5s @ 35mA
 - Sensor Read: 1.36s @ 9mA
-- Direct Sunlight Solar Charge: 9mA
-- Indirect Sunlight Solar Charge: 300uA
+- Direct Sunlight Solar Charge: 12mA
+- Indirect Sunlight Solar Charge: 454uA
 
 Notes: 
 - GNSS time to fix depends on the conditions of the sky
@@ -91,11 +91,11 @@ Notes:
 
 <p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/gnss_fix_hot.png" alt="gnss_fix-hot_start"  width="90%" height="90%"/><br><b>GNSS Fix - Hot Start</b></p>
 
-<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/sensor_read_without_gnss_fix.png" alt="sensor_read"  width="90%" height="90%"/><br><b>Sensor Read</b></p>
+<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/sensor_read_without_gnss_fix.png" alt="sensor_read_without_gnss_fix"  width="90%" height="90%"/><br><b>Sensor Read</b></p>
 
 | Solar Charge - Direct Sunlight | Solar Charge - Indirect Sunlight |
 |--|--|
-| <p align="center"> <img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/charge_direct_sunlight.jpg" alt="assembled_front"  width="80%" height="80%"/></p> | <p align="center"> <img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/charge_indirect_sunlight.jpg" alt="assembled_back"  width="70%" height="70%"/></p> |
+| <p align="center"> <img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/solar_charge_direct_sunlight.jpg" alt="solar_charge_direct_sunlight"  width="80%" height="80%"/></p> | <p align="center"> <img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/solar_charge_indirect_sunlight.jpg" alt="solar_charge_indirect_sunlight"  width="70%" height="70%"/></p> |
 
 More measurement can be found [here](https://github.com/teapotlaboratories/bwlr3d/tree/main/docs/measurement)
 
@@ -151,7 +151,7 @@ Out of the factory, the RAK3172 chip ships with an **AT firmware** that can be t
 
 The following are some very good tutorial to start developing with the device:
 
-- [Communicating with the AT firmware](https://docs.rakwireless.com/Product-Categories/WisDuo/RAK3172-Module/Quickstart/#rak3172-as-a-lora-lorawan-modem-via-at-command)
+ - [Communicating with the AT firmware](https://docs.rakwireless.com/Product-Categories/WisDuo/RAK3172-Module/Quickstart/#rak3172-as-a-lora-lorawan-modem-via-at-command)
  - [Programming with Arduino](https://docs.rakwireless.com/Product-Categories/WisDuo/RAK3172-Module/Quickstart/#rak3172-as-a-stand-alone-device-using-rui3)
  - [Programming with STM32Cube](https://docs.rakwireless.com/Product-Categories/WisDuo/RAK3172-Module/Low-Level-Development/#rak3172-on-stm32cubeide-with-stm32wl-sdk-v1-0-0)
  - [Programming with MbedOS](https://github.com/hallard/LoRa-E5-Tiny/blob/main/README.md#compile-and-flash-firmware)

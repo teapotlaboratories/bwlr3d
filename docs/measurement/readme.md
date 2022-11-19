@@ -6,8 +6,8 @@ The following are the summary of the measurement:
 - GNSS Fix - Cold Start: 15s @ 38mA
 - GNSS Fix - Hot Start: 5s @ 35mA
 - Sensor Read: 1.36s @ 9mA
-- Direct Sunlight Solar Charge: 9mA
-- Indirect Sunlight Solar Charge: 300uA
+- Direct Sunlight Solar Charge: 12mA
+- Indirect Sunlight Solar Charge: 454uA
 
 Notes: 
 - GNSS time to fix depends on the conditions of the sky
@@ -25,15 +25,27 @@ Notes:
 <p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/gnss_fix_hot.png" alt="gnss_fix-hot_start"  width="90%" height="90%"/></p>
 
 ## Sensor Read without GNSS Fix
-<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/sensor_read_without_gnss_fix.png" alt="sensor_read"  width="90%" height="90%"/></p>
+<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/sensor_read_without_gnss_fix.png" alt="sensor_read_without_gnss_fix"  width="90%" height="90%"/></p>
 
 ## Sensor Read with GNSS Fix
-<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/sensor_read_and_gnss_fix_hot_start.png" alt="sensor_read"  width="90%" height="90%"/></p>
+<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/sensor_read_and_gnss_fix_hot_start.png" alt="sensor_read_and_gnss_fix_hot_start"  width="90%" height="90%"/></p>
 
 ## Simple LoRa Application - Sensor Read and GNSS Fix then Transmit
 Power consumption for the **SimpleLoraApplication** when it read all sensor data, wait for GNSS fix and LoRa transmit
-<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/simple_lora_application-sensor_and_gnss_data_transmit.png" alt="sensor_read"  width="90%" height="90%"/></p>
+<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/simple_lora_application-sensor_and_gnss_data_transmit.png" alt="simple_lora_application-sensor_and_gnss_data_transmit"  width="90%" height="90%"/></p>
 
 ## Simple LoRa Application - Sensor Read Fix then Transmit
 Power consumption for the **SimpleLoraApplication** when it read all sensor data and LoRa transmit
-<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/simple_lora_application-sensor_data_transmit.png" alt="sensor_read"  width="90%" height="90%"/></p>
+<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/simple_lora_application-sensor_data_transmit.png" alt="simple_lora_application-sensor_data_transmit"  width="90%" height="90%"/></p>
+
+## Solar Charge - Direct Sunlight
+<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/solar_charge_direct_sunlight.jpg" alt="solar_charge_direct_sunlight"  width="90%" height="90%"/></p>
+
+## Solar Charge - Indirect Sunlight
+<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/solar_charge_indirect_sunlight.jpg" alt="solar_charge_indirect_sunlight"  width="90%" height="90%"/></p>
+
+## Solar Charge - Indirect Low Sunlight
+<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/solar_charge_indirect_low_sunlight.jpg" alt="solar_charge_indirect_low_sunlight"  width="90%" height="90%"/></p>
+
+## Solar Charge - Indirect Very Low Sunlight
+<p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/measurement/solar_charge_indirect_very_low_sunlight.jpg" alt="solar_charge_indirect_very_low_sunlight"  width="90%" height="90%"/></p>
