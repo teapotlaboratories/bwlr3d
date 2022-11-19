@@ -7,7 +7,7 @@
 - **GNSSSleep**: Test setting the L86-M33 module to sleep
 - **PowerTest**: Test and measure power consumption for multiple case
 - **SensorTest**: Test reading all on-board sensor
-- **SimpleLoRaApplication**: Simple LoRa application
+- **SimpleLoRaApplication**: Simple LoRa application with simple and inefficient payload encoding. 
 	- Connect to a LoRaWAN Gateway at boot
 	- Get GNSS first fix ( loop indefintely until get satellite fix )
 	- Periodically send sensor data to gateway
