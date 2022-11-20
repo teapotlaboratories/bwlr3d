@@ -340,7 +340,7 @@ namespace payload {
     // calculate CRC16
     size_t frame_size = sizeof(this->data);
     size_t payload_wo_crc16_size = frame_size - sizeof(this->data.trailer.checksum);
-    this->data.trailer.checksum = crc16(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc16_size, 0x1021, 0, 0, false, false);  
+    this->data.trailer.checksum = crc16_CCITT(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc16_size);  
   }
   
   size_t Environmental::GetAsBytes(uint8_t* data, size_t size)
@@ -367,7 +367,7 @@ namespace payload {
     // calculate CRC16
     size_t frame_size = sizeof(this->data);
     size_t payload_wo_crc16_size = frame_size - sizeof(this->data.trailer.checksum);
-    this->data.trailer.checksum = crc16(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc16_size, 0x1021, 0, 0, false, false);
+    this->data.trailer.checksum = crc16_CCITT(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc16_size);
   }
   
   size_t Imu::GetAsBytes(uint8_t* data, size_t size)
@@ -402,7 +402,7 @@ namespace payload {
     // calculate CRC16
     size_t frame_size = sizeof(this->data);
     size_t payload_wo_crc16_size = frame_size - sizeof(this->data.trailer.checksum);
-    this->data.trailer.checksum = crc16(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc16_size, 0x1021, 0, 0, false, false);  
+    this->data.trailer.checksum = crc16_CCITT(reinterpret_cast<uint8_t*>( &(this->data) ), payload_wo_crc16_size);  
   }
   
   size_t Gnss::GetAsBytes(uint8_t* data, size_t size)
