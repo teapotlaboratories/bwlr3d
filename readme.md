@@ -64,7 +64,7 @@ Built using [TinkerCAD](https://www.tinkercad.com), the cases are available with
  <p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/images/case_open.jpg" alt="drawing"  width="50%" height="50%"/><br><b>Case Open</b></p>
 
 The case is design to be as small as possible with an additional magnets in the back to ease the placement of the sensor. The following are the list of material used at the time of testing:
-- 3.7v LiPo Battery, 400 mAh 50mm x 25mm x 35mm
+- 3.7v LiPo Battery, 500 mAh 50mm x 22mm x 48mm
 - 4 piece of 8mm x 2mm neodymium magnet
 
 <p align="center"><img src="https://github.com/teapotlaboratories/bwlr3d/raw/main/docs/images/placement_showcase.gif" alt="placement_showcase"  width="50%" height="50%"/><br><b>Sensor Placement with Magnet</b></p>
