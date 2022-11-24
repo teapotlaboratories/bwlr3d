@@ -18,6 +18,7 @@ struct Frame {
 } __attribute__((packed));
 '''
 class Environmental(Packet):
+    kName       = "environmental"
     kType       = 0x01
     kDataSize   = 4 + 4 + 4 + 4 + 4 + 4 
     kSize       = ( Packet.Header.kSize + 
@@ -28,6 +29,7 @@ class Environmental(Packet):
         super().__init__()
         self.header.version = Packet.kVersion
         self.header.type    = Environmental.kType
+        self.name           = Environmental.kName
         self.Set(battery, temperature, pressure, humidity, gas_resistance, lux)
 
     def Set(self, battery:float, temperature:float, pressure: float, humidity: float, gas_resistance: float, lux: float):

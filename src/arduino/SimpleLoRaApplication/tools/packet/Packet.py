@@ -61,7 +61,14 @@ class Packet:
     def __init__(self):
         self.header     = Packet.Header()
         self.trailer    = Packet.Trailer()
+        self.name       = ""
  
+    def GetType(self):
+        return self.header.type
+
+    def GetName(self):
+        return self.name
+
     @abstractmethod
     def GetAsBytes(self):
         pass

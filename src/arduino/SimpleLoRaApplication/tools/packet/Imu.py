@@ -52,7 +52,8 @@ class Imu(Packet):
             vector.y = parsed[1]
             vector.z = parsed[2]
             return vector        
-                                        
+    
+    kName       = "imu"
     kType       = 0x02
     kDataSize   = Vector.kSize + Vector.kSize + Vector.kSize
     kSize       = ( Packet.Header.kSize + 
@@ -62,6 +63,7 @@ class Imu(Packet):
         super().__init__()
         self.header.version = Packet.kVersion
         self.header.type    = Imu.kType
+        self.name           = Imu.kName
         self.Set(magnetic, acceleration, gyro)
 
     def Set(self, magnetic: Vector, acceleration: Vector, gyro: Vector):

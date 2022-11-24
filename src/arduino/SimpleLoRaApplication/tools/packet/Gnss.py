@@ -17,6 +17,7 @@ struct Frame {
 } __attribute__((packed));
 '''
 class Gnss(Packet):
+    kName       = "gnss"
     kType       = 0x03
     kDataSize   = 2 + 4 + 8 + 8 + 8 
     kSize       = ( Packet.Header.kSize + 
@@ -27,6 +28,7 @@ class Gnss(Packet):
         super().__init__()
         self.header.version = Packet.kVersion
         self.header.type    = Gnss.kType
+        self.name           = Gnss.kName
         self.Set(satellite, hdop, latitude, longitude, altitude)
 
     def Set(self, satellite:int, hdop:float, latitude: float, longitude: float, altitude: float):
