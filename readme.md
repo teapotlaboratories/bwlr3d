@@ -16,7 +16,7 @@ Teapot BWLR3D is part of  [Teapot open-hardware project](https://github.com/teap
 
 ## Future Works
 - Develop code to read sensor and send data when movement is detected. **LSM6DSOX** can be set to ultra-low power mode and set to wake MCU when movement is detected, all other sensors needs to be in power-down mode.
-- Change SW4 wiring from GND to 3V3
+- Change `SW4` wiring from GND to 3V3, to boot to STM32WLE USART Bootloader. This allows flashing the RAK3172 module STM32CubeProgrammer, with ST-Link.
 
 ## Specification
 
